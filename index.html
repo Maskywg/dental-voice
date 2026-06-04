@@ -309,6 +309,15 @@ function checkSpeechSupport() {
 }
 
 function toggleVoice(fieldId) {
+  if (isIOS) {
+    // iOS：直接 focus textarea，讓使用者點鍵盤上的 🎤 語音輸入鍵
+    const ta = document.getElementById(fieldId);
+    ta.focus();
+    // 將游標移到最末端
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+    setStatus('📱 請點鍵盤右下角的 🎤 開始語音輸入', true);
+    return;
+  }
   if (isListening && currentField === fieldId) {
     stopVoice();
     return;
