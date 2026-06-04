@@ -189,6 +189,11 @@
   .history-item .h-name { font-weight: 700; color: #2b6cb0; margin-bottom: 4px; }
   .history-item .h-row { color: #718096; }
   .history-item .h-time { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+  .loc-group { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+  .loc-chip { padding: 7px 13px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: #f7fafc; font-size: 0.9rem; color: #4a5568; cursor: pointer; user-select: none; transition: all 0.15s; font-family: inherit; }
+  .loc-chip.selected { background: #2b6cb0; border-color: #2b6cb0; color: white; font-weight: 600; }
+  .loc-result { font-size: 0.85rem; color: #718096; margin-top: 6px; min-height: 20px; }
+  .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
 </style>
 </head>
 <body>
@@ -219,10 +224,30 @@
 <!-- 本次處置部位 -->
 <div class="card">
   <div class="field-label">本次處置部位</div>
-  <div class="field-row">
-    <textarea id="location" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
-    <button class="mic-btn" id="mic-location" onclick="toggleVoice('location')" title="語音輸入">🎤</button>
+  <div class="loc-group" id="loc-area-chips">
+    <button class="loc-chip" onclick="toggleChip('location','左上',this)">左上</button>
+    <button class="loc-chip" onclick="toggleChip('location','左下',this)">左下</button>
+    <button class="loc-chip" onclick="toggleChip('location','右上',this)">右上</button>
+    <button class="loc-chip" onclick="toggleChip('location','右下',this)">右下</button>
+    <button class="loc-chip" onclick="toggleChip('location','全口',this)">全口</button>
+    <button class="loc-chip" onclick="toggleChip('location','上顎',this)">上顎</button>
+    <button class="loc-chip" onclick="toggleChip('location','下顎',this)">下顎</button>
   </div>
+  <div class="loc-divider"></div>
+  <div class="loc-group">
+    <button class="loc-chip" onclick="toggleChip('location','0',this)">0</button>
+    <button class="loc-chip" onclick="toggleChip('location','1',this)">1</button>
+    <button class="loc-chip" onclick="toggleChip('location','2',this)">2</button>
+    <button class="loc-chip" onclick="toggleChip('location','3',this)">3</button>
+    <button class="loc-chip" onclick="toggleChip('location','4',this)">4</button>
+    <button class="loc-chip" onclick="toggleChip('location','5',this)">5</button>
+    <button class="loc-chip" onclick="toggleChip('location','6',this)">6</button>
+    <button class="loc-chip" onclick="toggleChip('location','7',this)">7</button>
+    <button class="loc-chip" onclick="toggleChip('location','8',this)">8</button>
+    <button class="loc-chip" onclick="toggleChip('location','9',this)">9</button>
+  </div>
+  <div class="loc-result" id="location-result">尚未選擇</div>
+  <input type="hidden" id="location" value="">
 </div>
 
 <!-- 本次療程 -->
@@ -246,10 +271,30 @@
 <!-- 下次處置部位 -->
 <div class="card">
   <div class="field-label">下次處置部位</div>
-  <div class="field-row">
-    <textarea id="nextloc" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
-    <button class="mic-btn" id="mic-nextloc" onclick="toggleVoice('nextloc')" title="語音輸入">🎤</button>
+  <div class="loc-group">
+    <button class="loc-chip" onclick="toggleChip('nextloc','左上',this)">左上</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','左下',this)">左下</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','右上',this)">右上</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','右下',this)">右下</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','全口',this)">全口</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','上顎',this)">上顎</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','下顎',this)">下顎</button>
   </div>
+  <div class="loc-divider"></div>
+  <div class="loc-group">
+    <button class="loc-chip" onclick="toggleChip('nextloc','0',this)">0</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','1',this)">1</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','2',this)">2</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','3',this)">3</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','4',this)">4</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','5',this)">5</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','6',this)">6</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','7',this)">7</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','8',this)">8</button>
+    <button class="loc-chip" onclick="toggleChip('nextloc','9',this)">9</button>
+  </div>
+  <div class="loc-result" id="nextloc-result">尚未選擇</div>
+  <input type="hidden" id="nextloc" value="">
 </div>
 
 <!-- 交代事項 -->
@@ -624,13 +669,53 @@ function renderHistory() {
 
 function clearAll() {
   stopVoice();
-  ['name', 'location', 'treatment', 'next', 'nextloc', 'note'].forEach(id => {
+  ['name', 'treatment', 'next', 'note'].forEach(id => {
     const ta = document.getElementById(id);
     ta.value = '';
     ta.style.height = '';
   });
   document.getElementById('lab').value = '';
+  clearLocChips('location');
+  clearLocChips('nextloc');
   setStatus('點擊 🎤 開始語音輸入');
+}
+
+// ── 處置部位 chip 邏輯 ──
+const locSelections = { location: [], nextloc: [] };
+
+function toggleChip(fieldId, value, btn) {
+  const sel = locSelections[fieldId];
+  const idx = sel.indexOf(value);
+  if (idx === -1) {
+    sel.push(value);
+    btn.classList.add('selected');
+  } else {
+    sel.splice(idx, 1);
+    btn.classList.remove('selected');
+  }
+  const joined = sel.join(' ');
+  document.getElementById(fieldId).value = joined;
+  const resultEl = document.getElementById(fieldId + '-result');
+  if (resultEl) resultEl.textContent = joined || '尚未選擇';
+}
+
+function clearLocChips(fieldId) {
+  locSelections[fieldId] = [];
+  document.getElementById(fieldId).value = '';
+  const resultEl = document.getElementById(fieldId + '-result');
+  if (resultEl) resultEl.textContent = '尚未選擇';
+  // 取消所有 chip 選取
+  document.querySelectorAll(`[onclick*="toggleChip('${fieldId}'"]`).forEach(b => b.classList.remove('selected'));
+}
+
+function setLocChips(fieldId, valueStr) {
+  clearLocChips(fieldId);
+  if (!valueStr) return;
+  valueStr.split(' ').forEach(v => {
+    const btn = [...document.querySelectorAll(`[onclick*="toggleChip('${fieldId}'"]`)]
+      .find(b => b.textContent.trim() === v);
+    if (btn) toggleChip(fieldId, v, btn);
+  });
 }
 
 let editIndex = null;
@@ -639,7 +724,7 @@ function openEdit(i) {
   editIndex = i;
   const h = history[i];
   document.getElementById('edit-name').value = h.name || '';
-  document.getElementById('edit-location').value = h.location || '';
+  document.getElementById('edit-location').value = h.location || ''; // edit modal 用文字方式
   document.getElementById('edit-treatment').value = h.treatment || '';
   document.getElementById('edit-next').value = h.next || '';
   document.getElementById('edit-nextloc').value = h.nextloc || '';
