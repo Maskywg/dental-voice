@@ -243,6 +243,13 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- iOS 語音引導提示 -->
+<div id="iosGuide" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2b6cb0;color:white;padding:18px 20px;z-index:999;align-items:center;gap:14px;font-size:1rem;line-height:1.5;">
+  <div style="font-size:2rem;">⌨️</div>
+  <div>鍵盤已開啟，請點鍵盤上的<br><strong>🎤 麥克風按鍵</strong>開始說話</div>
+  <button onclick="document.getElementById('iosGuide').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:8px 12px;font-size:0.9rem;cursor:pointer;">✕</button>
+</div>
+
 <!-- Config Modal -->
 <div id="configModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:24px;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;">
@@ -299,20 +306,35 @@ function init() {
   renderHistory();
 }
 
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 function checkSpeechSupport() {
+  // iOS 改用鍵盤語音，不需要 Web Speech API
+  if (isIOS) return;
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Safari 或 Chrome';
+    document.getElementById('statusBar').textContent = '⚠️ 請使用 Chrome 或 Safari';
     document.querySelectorAll('.mic-btn').forEach(b => b.disabled = true);
   }
 }
 
 function toggleVoice(fieldId) {
-  if (isListening && currentField === fieldId) {
-    stopVoice();
+  if (isIOS) {
+    // iOS：focus 欄位，讓用戶按鍵盤上的 🎤
+    const ta = document.getElementById(fieldId);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+    showIOSGuide();
     return;
   }
+  if (isListening && currentField === fieldId) { stopVoice(); return; }
   if (isListening) stopVoice();
   startVoice(fieldId);
+}
+
+function showIOSGuide() {
+  const guide = document.getElementById('iosGuide');
+  guide.style.display = 'flex';
+  setTimeout(() => guide.style.display = 'none', 4000);
 }
 
 function startVoice(fieldId) {
