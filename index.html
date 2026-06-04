@@ -352,7 +352,30 @@
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次處置部位</div>
-      <textarea id="edit-location" rows="1" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="loc-group">
+        <button class="loc-chip" onclick="toggleChip('edit-location','左上',this)">左上</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','左下',this)">左下</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','右上',this)">右上</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','右下',this)">右下</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','全口',this)">全口</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','上顎',this)">上顎</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','下顎',this)">下顎</button>
+      </div>
+      <div class="loc-divider"></div>
+      <div class="loc-group">
+        <button class="loc-chip" onclick="toggleChip('edit-location','0',this)">0</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','1',this)">1</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','2',this)">2</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','3',this)">3</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','4',this)">4</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','5',this)">5</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','6',this)">6</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','7',this)">7</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','8',this)">8</button>
+        <button class="loc-chip" onclick="toggleChip('edit-location','9',this)">9</button>
+      </div>
+      <div class="loc-result" id="edit-location-result">尚未選擇</div>
+      <input type="hidden" id="edit-location" value="">
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
@@ -364,7 +387,30 @@
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
-      <textarea id="edit-nextloc" rows="1" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="loc-group">
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','左上',this)">左上</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','左下',this)">左下</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','右上',this)">右上</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','右下',this)">右下</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','全口',this)">全口</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','上顎',this)">上顎</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','下顎',this)">下顎</button>
+      </div>
+      <div class="loc-divider"></div>
+      <div class="loc-group">
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','0',this)">0</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','1',this)">1</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','2',this)">2</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','3',this)">3</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','4',this)">4</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','5',this)">5</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','6',this)">6</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','7',this)">7</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','8',this)">8</button>
+        <button class="loc-chip" onclick="toggleChip('edit-nextloc','9',this)">9</button>
+      </div>
+      <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
+      <input type="hidden" id="edit-nextloc" value="">
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">交代事項</div>
@@ -681,7 +727,7 @@ function clearAll() {
 }
 
 // ── 處置部位 chip 邏輯 ──
-const locSelections = { location: [], nextloc: [] };
+const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
 
 function toggleChip(fieldId, value, btn) {
   const sel = locSelections[fieldId];
@@ -724,10 +770,10 @@ function openEdit(i) {
   editIndex = i;
   const h = history[i];
   document.getElementById('edit-name').value = h.name || '';
-  document.getElementById('edit-location').value = h.location || ''; // edit modal 用文字方式
+  setLocChips('edit-location', h.location || '');
   document.getElementById('edit-treatment').value = h.treatment || '';
   document.getElementById('edit-next').value = h.next || '';
-  document.getElementById('edit-nextloc').value = h.nextloc || '';
+  setLocChips('edit-nextloc', h.nextloc || '');
   document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
   const modal = document.getElementById('editModal');
@@ -743,10 +789,10 @@ async function saveEdit() {
   if (editIndex === null) return;
   const h = history[editIndex];
   const name = document.getElementById('edit-name').value.trim();
-  const location = document.getElementById('edit-location').value.trim();
+  const location = document.getElementById('edit-location').value;
   const treatment = document.getElementById('edit-treatment').value.trim();
   const next = document.getElementById('edit-next').value.trim();
-  const nextloc = document.getElementById('edit-nextloc').value.trim();
+  const nextloc = document.getElementById('edit-nextloc').value;
   const note = document.getElementById('edit-note').value.trim();
   const lab = document.getElementById('edit-lab').value;
 
