@@ -380,11 +380,11 @@ function startVoice(fieldId) {
   };
 
   if (isIOS) {
-    // iOS 需要先取得 getUserMedia 暖機，SpeechRecognition 才能取得麥克風
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
-        stream.getTracks().forEach(t => t.stop()); // 釋放 stream，只是為了觸發權限
         recognition.start();
+        // 辨識啟動後再釋放，避免 iOS 搶不到麥克風
+        setTimeout(() => stream.getTracks().forEach(t => t.stop()), 500);
       })
       .catch(() => {
         setStatus('⚠️ 麥克風被拒絕，請在設定中允許');
