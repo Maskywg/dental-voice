@@ -299,25 +299,14 @@ function init() {
   renderHistory();
 }
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
 function checkSpeechSupport() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Chrome 或 Safari';
+    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Safari 或 Chrome';
     document.querySelectorAll('.mic-btn').forEach(b => b.disabled = true);
   }
 }
 
 function toggleVoice(fieldId) {
-  if (isIOS) {
-    // iOS：直接 focus textarea，讓使用者點鍵盤上的 🎤 語音輸入鍵
-    const ta = document.getElementById(fieldId);
-    ta.focus();
-    // 將游標移到最末端
-    ta.selectionStart = ta.selectionEnd = ta.value.length;
-    setStatus('📱 請點鍵盤右下角的 🎤 開始語音輸入', true);
-    return;
-  }
   if (isListening && currentField === fieldId) {
     stopVoice();
     return;
@@ -327,11 +316,13 @@ function toggleVoice(fieldId) {
 }
 
 function startVoice(fieldId) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setStatus('⚠️ 請使用 Safari 或 Chrome'); return; }
+
+  recognition = new SR();
   recognition.lang = 'zh-TW';
-  recognition.continuous = !isIOS; // iOS 不支援 continuous
-  recognition.interimResults = !isIOS;
+  recognition.continuous = false;
+  recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
   currentField = fieldId;
@@ -341,67 +332,35 @@ function startVoice(fieldId) {
   btn.classList.add('active');
   btn.textContent = '⏹';
   ta.classList.add('listening');
-  setStatus('🔴 正在收音，說話後稍停即可...', true);
 
   let baseText = ta.value;
 
+  recognition.onstart = () => setStatus('🔴 收音中，說完會自動辨識...', true);
+
   recognition.onresult = (e) => {
-    let interim = '';
-    let final = '';
+    let interim = '', final = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
       if (e.results[i].isFinal) final += t;
       else interim += t;
     }
     if (final) baseText += final;
-    ta.value = baseText + (isIOS ? '' : interim);
+    ta.value = baseText + interim;
     autoResize(ta);
   };
 
   recognition.onerror = (e) => {
-    const msg = {
-      'no-speech': '沒偵測到聲音，請再試',
-      'network': '網路錯誤，請確認網路連線',
-      'not-allowed': '麥克風被拒絕，請在設定中允許',
-      'audio-capture': '找不到麥克風',
-      'aborted': null
-    }[e.error] || ('錯誤：' + e.error);
-    if (msg) setStatus('⚠️ ' + msg);
-    if (e.error !== 'no-speech') stopVoice();
-  };
-
-  recognition.onstart = () => {
-    setStatus('🔴 收音中，請說話...', true);
+    const msgs = { 'no-speech': '沒偵測到聲音，請再試', 'network': '網路錯誤', 'not-allowed': '麥克風被拒絕，請在設定中允許', 'audio-capture': '找不到麥克風' };
+    if (msgs[e.error]) setStatus('⚠️ ' + msgs[e.error]);
+    stopVoice();
   };
 
   recognition.onend = () => {
-    if (!isListening) return;
-    if (isIOS) {
-      setStatus('✅ 說完請再按 🎤 繼續');
-      stopVoice();
-    } else {
-      setTimeout(() => {
-        if (isListening && recognition) {
-          try { recognition.start(); } catch(e) {}
-        }
-      }, 100);
-    }
+    stopVoice();
+    setStatus('✅ 說完，再按 🎤 繼續輸入');
   };
 
-  if (isIOS) {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        recognition.start();
-        // 辨識啟動後再釋放，避免 iOS 搶不到麥克風
-        setTimeout(() => stream.getTracks().forEach(t => t.stop()), 500);
-      })
-      .catch(() => {
-        setStatus('⚠️ 麥克風被拒絕，請在設定中允許');
-        stopVoice();
-      });
-  } else {
-    recognition.start();
-  }
+  recognition.start();
 }
 
 function stopVoice() {
