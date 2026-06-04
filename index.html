@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>牙科醫囑語音輸入</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="牙科醫囑">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding: 16px;
+    color: #1a202c;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2b6cb0;
+    margin-bottom: 20px;
+    padding: 12px 0;
+    border-bottom: 2px solid #bee3f8;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .field-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  textarea {
+    flex: 1;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #2d3748;
+    resize: none;
+    min-height: 52px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+    background: #f7fafc;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #4299e1;
+    background: white;
+  }
+  textarea.listening {
+    border-color: #f6ad55;
+    background: #fffaf0;
+    animation: pulse-border 1s infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { border-color: #f6ad55; }
+    50% { border-color: #ed8936; }
+  }
+  .mic-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #4299e1;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 2px;
+    box-shadow: 0 2px 6px rgba(66,153,225,0.4);
+  }
+  .mic-btn:active { transform: scale(0.93); }
+  .mic-btn.active {
+    background: #e53e3e;
+    box-shadow: 0 0 0 6px rgba(229,62,62,0.2);
+    animation: pulse-btn 1s infinite;
+  }
+  @keyframes pulse-btn {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(229,62,62,0.2); }
+    50% { box-shadow: 0 0 0 10px rgba(229,62,62,0.05); }
+  }
+  .status-bar {
+    text-align: center;
+    font-size: 0.82rem;
+    color: #a0aec0;
+    margin: 4px 0 16px;
+    min-height: 18px;
+  }
+  .status-bar.listening-status { color: #dd6b20; font-weight: 600; }
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #2b6cb0, #4299e1);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    box-shadow: 0 4px 14px rgba(43,108,176,0.35);
+    transition: all 0.2s;
+  }
+  .submit-btn:active { transform: scale(0.97); }
+  .submit-btn:disabled { background: #a0aec0; box-shadow: none; cursor: not-allowed; }
+  .clear-btn {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: #718096;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s;
+  }
+  .clear-btn:active { background: #f7fafc; }
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2d3748;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #276749; }
+  .toast.error { background: #c53030; }
+  .config-banner {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: #856404;
+    line-height: 1.5;
+  }
+  .config-banner a { color: #0d6efd; }
+  .history-section {
+    margin-top: 8px;
+  }
+  .history-title {
+    font-size: 0.8rem;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .history-item {
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #4a5568;
+    border-left: 3px solid #4299e1;
+  }
+  .history-item .h-name { font-weight: 700; color: #2b6cb0; margin-bottom: 4px; }
+  .history-item .h-row { color: #718096; }
+  .history-item .h-time { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>🦷 牙科醫囑語音輸入</h1>
+
+<div class="config-banner" id="configBanner">
+  ⚙️ 首次使用請先設定 Google Sheet 連結。<br>
+  <a href="#" onclick="showConfig()">點此設定 Apps Script 網址</a>
+</div>
+
+<!-- 患者姓名 -->
+<div class="card">
+  <div class="field-label">患者姓名</div>
+  <div class="field-row">
+    <textarea id="name" rows="1" placeholder="輸入或語音辨識患者姓名"></textarea>
+    <button class="mic-btn" id="mic-name" onclick="toggleVoice('name')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
+<!-- 本次療程 -->
+<div class="card">
+  <div class="field-label">本次療程</div>
+  <div class="field-row">
+    <textarea id="treatment" rows="3" placeholder="例：右上第一大臼齒根管治療第二次，沖洗並封藥"></textarea>
+    <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
+<!-- 下次可能療程 -->
+<div class="card">
+  <div class="field-label">下次可能療程</div>
+  <div class="field-row">
+    <textarea id="next" rows="3" placeholder="例：根管充填、暫時冠製作，建議一週後回診"></textarea>
+    <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">點擊 🎤 開始語音輸入</div>
+
+<button class="submit-btn" onclick="submitData()" id="submitBtn">上傳至 Google Sheet</button>
+<button class="clear-btn" onclick="testConnection()" style="margin-top:8px;color:#2b6cb0;border-color:#bee3f8;">🔗 測試 Google Sheet 連線</button>
+<button class="clear-btn" onclick="clearAll()">清除重填</button>
+<button class="clear-btn" onclick="clearHistory()" style="color:#e53e3e;border-color:#fed7d7;margin-top:4px;">🗑 清除今日紀錄</button>
+
+<!-- 今日紀錄 -->
+<div class="card history-section" style="margin-top:20px;">
+  <div class="history-title">📋 本次已上傳紀錄</div>
+  <div id="historyList"><div style="color:#a0aec0;font-size:0.85rem;">尚無紀錄</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Config Modal -->
+<div id="configModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:24px;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;">
+    <h3 style="margin-bottom:12px;color:#2b6cb0;">設定 Google Apps Script 網址</h3>
+    <p style="font-size:0.82rem;color:#718096;margin-bottom:16px;line-height:1.6;">
+      請先建立 Google Sheet 並部署 Apps Script，取得 Web App 網址後貼入下方。<br>
+      <a href="#" onclick="showGuide()" style="color:#4299e1;">查看設定步驟</a>
+    </p>
+    <textarea id="scriptUrl" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-size:0.85rem;font-family:monospace;" placeholder="https://script.google.com/macros/s/..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="saveConfig()" style="flex:1;padding:12px;background:#4299e1;color:white;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">儲存</button>
+      <button onclick="closeConfig()" style="flex:1;padding:12px;background:#e2e8f0;color:#4a5568;border:none;border-radius:10px;font-size:1rem;cursor:pointer;">取消</button>
+    </div>
+    <hr style="margin:16px 0;border:none;border-top:1px solid #e2e8f0;">
+    <div id="guideArea" style="display:none;font-size:0.8rem;color:#4a5568;line-height:1.8;">
+      <b>Apps Script 程式碼：</b>
+      <pre id="scriptCode" style="background:#f7fafc;border-radius:8px;padding:10px;overflow-x:auto;font-size:0.75rem;margin-top:8px;white-space:pre-wrap;border:1px solid #e2e8f0;"></pre>
+      <button onclick="copyScript()" style="margin-top:8px;padding:8px 16px;background:#48bb78;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.85rem;">複製程式碼</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_CODE = `function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['時間戳記', '患者姓名', '本次療程', '下次可能療程']);
+  }
+
+  sheet.appendRow([
+    new Date().toLocaleString('zh-TW'),
+    e.parameter.name    || '',
+    e.parameter.treatment || '',
+    e.parameter.next    || ''
+  ]);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ result: 'success' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+let recognition = null;
+let currentField = null;
+let isListening = false;
+let scriptUrl = localStorage.getItem('dentalScriptUrl') || 'https://script.google.com/macros/s/AKfycbzUQRqAeGcTGcpKllh0ZNcQ5-F11xzo9_Rji06K5Zh6lRwt8cX4NLR-NW7YWR4KiA/exec';
+let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
+
+function init() {
+  if (scriptUrl) {
+    document.getElementById('configBanner').style.display = 'none';
+  }
+  checkSpeechSupport();
+  renderHistory();
+}
+
+function checkSpeechSupport() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Chrome';
+    document.querySelectorAll('.mic-btn').forEach(b => b.disabled = true);
+  }
+}
+
+function toggleVoice(fieldId) {
+  if (isListening && currentField === fieldId) {
+    stopVoice();
+    return;
+  }
+  if (isListening) stopVoice();
+  startVoice(fieldId);
+}
+
+function startVoice(fieldId) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'zh-TW';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  currentField = fieldId;
+  isListening = true;
+  const btn = document.getElementById('mic-' + fieldId);
+  const ta = document.getElementById(fieldId);
+  btn.classList.add('active');
+  btn.textContent = '⏹';
+  ta.classList.add('listening');
+  setStatus('🔴 正在收音，說話中...', true);
+
+  let baseText = ta.value;
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (final) baseText += final;
+    ta.value = baseText + interim;
+    autoResize(ta);
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted') setStatus('⚠️ 辨識錯誤：' + e.error);
+    stopVoice();
+  };
+
+  recognition.onend = () => {
+    if (isListening) recognition.start(); // 持續收音
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  if (recognition) {
+    recognition.onend = null;
+    recognition.stop();
+    recognition = null;
+  }
+  if (currentField) {
+    const btn = document.getElementById('mic-' + currentField);
+    const ta = document.getElementById(currentField);
+    if (btn) { btn.classList.remove('active'); btn.textContent = '🎤'; }
+    if (ta) ta.classList.remove('listening');
+  }
+  isListening = false;
+  currentField = null;
+  setStatus('點擊 🎤 開始語音輸入');
+}
+
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+
+function setStatus(msg, isActive = false) {
+  const bar = document.getElementById('statusBar');
+  bar.textContent = msg;
+  bar.className = 'status-bar' + (isActive ? ' listening-status' : '');
+}
+
+async function testConnection() {
+  setStatus('🔗 測試連線中...', true);
+  try {
+    const params = new URLSearchParams({ name: '測試', treatment: '連線測試', next: '' });
+    await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+    showToast('✅ 連線測試成功！請查看 Google Sheet', 'success');
+    addHistory('測試', '連線測試（可刪除）', '');
+  } catch (err) {
+    showToast('❌ 連線失敗：' + err.message, 'error');
+  }
+  setStatus('點擊 🎤 開始語音輸入');
+}
+
+async function submitData() {
+  if (!scriptUrl) {
+    showConfig();
+    return;
+  }
+  const name = document.getElementById('name').value.trim();
+  const treatment = document.getElementById('treatment').value.trim();
+  const next = document.getElementById('next').value.trim();
+
+  if (!name) { showToast('請輸入患者姓名', 'error'); return; }
+  if (!treatment) { showToast('請輸入本次療程', 'error'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '上傳中...';
+
+  try {
+    const params = new URLSearchParams({ name, treatment, next });
+    await fetch(scriptUrl + '?' + params.toString(), {
+      method: 'GET',
+      mode: 'no-cors'
+    });
+    addHistory(name, treatment, next);
+    showToast('✅ 上傳成功！', 'success');
+    clearAll();
+  } catch (err) {
+    showToast('上傳失敗：' + err.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '上傳至 Google Sheet';
+}
+
+function addHistory(name, treatment, next) {
+  const now = new Date().toLocaleTimeString('zh-TW');
+  history.unshift({ name, treatment, next, time: now });
+  localStorage.setItem('dentalHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) { el.innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">尚無紀錄</div>'; return; }
+  el.innerHTML = history.map(h => `
+    <div class="history-item">
+      <div class="h-name">👤 ${h.name}</div>
+      <div class="h-row">本次：${h.treatment}</div>
+      ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
+      <div class="h-time">${h.time}</div>
+    </div>
+  `).join('');
+}
+
+function clearAll() {
+  stopVoice();
+  ['name', 'treatment', 'next'].forEach(id => {
+    const ta = document.getElementById(id);
+    ta.value = '';
+    ta.style.height = '';
+  });
+  setStatus('點擊 🎤 開始語音輸入');
+}
+
+function clearHistory() {
+  if (!confirm('確定要清除今日所有紀錄？')) return;
+  history = [];
+  localStorage.removeItem('dentalHistory');
+  renderHistory();
+  showToast('今日紀錄已清除');
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function showConfig() {
+  const modal = document.getElementById('configModal');
+  modal.style.display = 'flex';
+  document.getElementById('scriptUrl').value = scriptUrl;
+}
+
+function closeConfig() {
+  document.getElementById('configModal').style.display = 'none';
+}
+
+function saveConfig() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    alert('請貼上正確的 Apps Script 網址');
+    return;
+  }
+  scriptUrl = url;
+  localStorage.setItem('dentalScriptUrl', url);
+  document.getElementById('configBanner').style.display = 'none';
+  closeConfig();
+  showToast('設定已儲存', 'success');
+}
+
+function showGuide() {
+  const guide = document.getElementById('guideArea');
+  guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('scriptCode').textContent = APPS_SCRIPT_CODE;
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
+    showToast('程式碼已複製', 'success');
+  });
+}
+
+// 讓 textarea 自動撐高
+document.querySelectorAll('textarea').forEach(ta => {
+  ta.addEventListener('input', () => autoResize(ta));
+});
+
+init();
+</script>
+</body>
+</html>
