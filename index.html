@@ -298,9 +298,11 @@ function init() {
   renderHistory();
 }
 
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 function checkSpeechSupport() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Chrome';
+    document.getElementById('statusBar').textContent = '⚠️ 此瀏覽器不支援語音辨識，請使用 Chrome 或 Safari';
     document.querySelectorAll('.mic-btn').forEach(b => b.disabled = true);
   }
 }
@@ -318,8 +320,8 @@ function startVoice(fieldId) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();
   recognition.lang = 'zh-TW';
-  recognition.continuous = true;
-  recognition.interimResults = true;
+  recognition.continuous = !isIOS; // iOS 不支援 continuous
+  recognition.interimResults = !isIOS;
   recognition.maxAlternatives = 1;
 
   currentField = fieldId;
@@ -329,7 +331,7 @@ function startVoice(fieldId) {
   btn.classList.add('active');
   btn.textContent = '⏹';
   ta.classList.add('listening');
-  setStatus('🔴 正在收音，說話中...', true);
+  setStatus('🔴 正在收音，說話後稍停即可...', true);
 
   let baseText = ta.value;
 
@@ -342,17 +344,30 @@ function startVoice(fieldId) {
       else interim += t;
     }
     if (final) baseText += final;
-    ta.value = baseText + interim;
+    ta.value = baseText + (isIOS ? '' : interim);
     autoResize(ta);
   };
 
   recognition.onerror = (e) => {
+    if (e.error === 'no-speech') return; // 忽略靜音錯誤，繼續等待
     if (e.error !== 'aborted') setStatus('⚠️ 辨識錯誤：' + e.error);
     stopVoice();
   };
 
   recognition.onend = () => {
-    if (isListening) recognition.start(); // 持續收音
+    if (!isListening) return;
+    if (isIOS) {
+      // iOS：說完一句自動停止，顯示提示讓使用者再按
+      setStatus('✅ 說完請再按 🎤 繼續', false);
+      stopVoice();
+    } else {
+      // Android / 桌機：延遲後重啟，持續收音
+      setTimeout(() => {
+        if (isListening && recognition) {
+          try { recognition.start(); } catch(e) {}
+        }
+      }, 100);
+    }
   };
 
   recognition.start();
