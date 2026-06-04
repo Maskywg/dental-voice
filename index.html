@@ -623,7 +623,9 @@ async function saveEdit() {
   try {
     if (h.id) {
       const params = new URLSearchParams({ action: 'update', id: h.id, name, treatment, next, lab });
-      await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+      const res = await fetch(scriptUrl + '?' + params.toString());
+      const data = await res.json().catch(() => ({}));
+      if (data.result !== 'success') throw new Error(data.error || 'Sheet 更新失敗');
     }
     history[editIndex] = { ...h, name, treatment, next, lab };
     localStorage.setItem('dentalHistory', JSON.stringify(history));
@@ -631,7 +633,7 @@ async function saveEdit() {
     closeEdit();
     showToast('✅ 修改已儲存', 'success');
   } catch (err) {
-    showToast('儲存失敗：' + err.message, 'error');
+    showToast('❌ ' + err.message, 'error');
   }
 
   saveBtn.disabled = false;
