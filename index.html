@@ -350,19 +350,27 @@ function startVoice(fieldId) {
   };
 
   recognition.onerror = (e) => {
-    if (e.error === 'no-speech') return; // 忽略靜音錯誤，繼續等待
-    if (e.error !== 'aborted') setStatus('⚠️ 辨識錯誤：' + e.error);
-    stopVoice();
+    const msg = {
+      'no-speech': '沒偵測到聲音，請再試',
+      'network': '網路錯誤，請確認網路連線',
+      'not-allowed': '麥克風被拒絕，請在設定中允許',
+      'audio-capture': '找不到麥克風',
+      'aborted': null
+    }[e.error] || ('錯誤：' + e.error);
+    if (msg) setStatus('⚠️ ' + msg);
+    if (e.error !== 'no-speech') stopVoice();
+  };
+
+  recognition.onstart = () => {
+    setStatus('🔴 收音中，請說話...', true);
   };
 
   recognition.onend = () => {
     if (!isListening) return;
     if (isIOS) {
-      // iOS：說完一句自動停止，顯示提示讓使用者再按
-      setStatus('✅ 說完請再按 🎤 繼續', false);
+      setStatus('✅ 說完請再按 🎤 繼續');
       stopVoice();
     } else {
-      // Android / 桌機：延遲後重啟，持續收音
       setTimeout(() => {
         if (isListening && recognition) {
           try { recognition.start(); } catch(e) {}
