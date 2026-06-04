@@ -231,6 +231,7 @@
 
 <button class="submit-btn" onclick="submitData()" id="submitBtn">上傳至 Google Sheet</button>
 <button class="clear-btn" onclick="testConnection()" style="margin-top:8px;color:#2b6cb0;border-color:#bee3f8;">🔗 測試 Google Sheet 連線</button>
+<button class="clear-btn" onclick="diagnoseMic()" style="margin-top:4px;color:#805ad5;border-color:#e9d8fd;">🔍 語音診斷</button>
 <button class="clear-btn" onclick="clearAll()">清除重填</button>
 <button class="clear-btn" onclick="clearHistory()" style="color:#e53e3e;border-color:#fed7d7;margin-top:4px;">🗑 清除今日紀錄</button>
 
@@ -399,6 +400,38 @@ function setStatus(msg, isActive = false) {
   const bar = document.getElementById('statusBar');
   bar.textContent = msg;
   bar.className = 'status-bar' + (isActive ? ' listening-status' : '');
+}
+
+async function diagnoseMic() {
+  const hasSpeech = ('SpeechRecognition' in window) || ('webkitSpeechRecognition' in window);
+  const ua = navigator.userAgent;
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua);
+  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+  const isChromeIOS = /CriOS/.test(ua);
+
+  let msg = `裝置：${isIOSDevice ? 'iOS' : 'Android/桌機'}\n`;
+  msg += `瀏覽器：${isChromeIOS ? 'Chrome(iOS)' : isSafari ? 'Safari' : 'Chrome/其他'}\n`;
+  msg += `語音API：${hasSpeech ? '✅ 支援' : '❌ 不支援'}\n`;
+  msg += `HTTPS：${location.protocol === 'https:' ? '✅' : '❌ 需要HTTPS'}\n`;
+
+  if (isIOSDevice && isChromeIOS) {
+    msg += '\n⚠️ iOS Chrome 不支援語音辨識\n請改用 Safari 開啟此頁面';
+  } else if (isIOSDevice && !hasSpeech) {
+    msg += '\n⚠️ 請更新 iOS 至 14.5 以上\n並使用 Safari 開啟';
+  } else if (!hasSpeech) {
+    msg += '\n⚠️ 請改用 Chrome 或 Safari';
+  } else {
+    // 嘗試請求麥克風權限
+    msg += '\n正在測試麥克風權限...';
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      msg += '\n麥克風：✅ 已授權';
+    } catch(e) {
+      msg += '\n麥克風：❌ ' + e.message + '\n請在瀏覽器設定中允許麥克風';
+    }
+  }
+
+  alert(msg);
 }
 
 async function testConnection() {
