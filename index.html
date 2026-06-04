@@ -216,6 +216,15 @@
   </div>
 </div>
 
+<!-- 本次處置部位 -->
+<div class="card">
+  <div class="field-label">本次處置部位</div>
+  <div class="field-row">
+    <textarea id="location" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <button class="mic-btn" id="mic-location" onclick="toggleVoice('location')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
 <!-- 本次療程 -->
 <div class="card">
   <div class="field-label">本次療程</div>
@@ -231,6 +240,24 @@
   <div class="field-row">
     <textarea id="next" rows="3" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
+<!-- 下次處置部位 -->
+<div class="card">
+  <div class="field-label">下次處置部位</div>
+  <div class="field-row">
+    <textarea id="nextloc" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <button class="mic-btn" id="mic-nextloc" onclick="toggleVoice('nextloc')" title="語音輸入">🎤</button>
+  </div>
+</div>
+
+<!-- 交代事項 -->
+<div class="card">
+  <div class="field-label">交代事項</div>
+  <div class="field-row">
+    <textarea id="note" rows="2" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <button class="mic-btn" id="mic-note" onclick="toggleVoice('note')" title="語音輸入">🎤</button>
   </div>
 </div>
 
@@ -279,12 +306,24 @@
       <input id="edit-name" type="text" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
     </div>
     <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次處置部位</div>
+      <textarea id="edit-location" rows="1" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
       <textarea id="edit-treatment" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
       <textarea id="edit-next" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
+      <textarea id="edit-nextloc" rows="1" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">交代事項</div>
+      <textarea id="edit-note" rows="2" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">技工所</div>
@@ -527,8 +566,11 @@ async function submitData() {
     return;
   }
   const name = document.getElementById('name').value.trim();
+  const location = document.getElementById('location').value.trim();
   const treatment = document.getElementById('treatment').value.trim();
   const next = document.getElementById('next').value.trim();
+  const nextloc = document.getElementById('nextloc').value.trim();
+  const note = document.getElementById('note').value.trim();
   const lab = document.getElementById('lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
@@ -540,9 +582,9 @@ async function submitData() {
 
   try {
     const id = Date.now().toString();
-    const params = new URLSearchParams({ action: 'insert', id, name, treatment, next, lab });
+    const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
     await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
-    addHistory(name, treatment, next, lab, id);
+    addHistory(name, location, treatment, next, nextloc, note, lab, id);
     showToast('✅ 上傳成功！', 'success');
     clearAll();
   } catch (err) {
@@ -553,9 +595,9 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
-function addHistory(name, treatment, next, lab, id) {
+function addHistory(name, location, treatment, next, nextloc, note, lab, id) {
   const now = new Date().toLocaleTimeString('zh-TW');
-  history.unshift({ name, treatment, next, lab, time: now, id });
+  history.unshift({ name, location, treatment, next, nextloc, note, lab, time: now, id });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
   renderHistory();
 }
@@ -569,8 +611,11 @@ function renderHistory() {
         <div class="h-name">👤 ${h.name}</div>
         <button onclick="openEdit(${i})" style="background:#ebf8ff;border:1px solid #bee3f8;color:#2b6cb0;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;flex-shrink:0;margin-left:8px;">✏️ 修改</button>
       </div>
+      ${h.location ? `<div class="h-row">📍 本次部位：${h.location}</div>` : ''}
       <div class="h-row">本次：${h.treatment}</div>
       ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
+      ${h.nextloc ? `<div class="h-row">📍 下次部位：${h.nextloc}</div>` : ''}
+      ${h.note ? `<div class="h-row">📝 交代：${h.note}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
       <div class="h-time">${h.time}</div>
     </div>
@@ -579,7 +624,7 @@ function renderHistory() {
 
 function clearAll() {
   stopVoice();
-  ['name', 'treatment', 'next'].forEach(id => {
+  ['name', 'location', 'treatment', 'next', 'nextloc', 'note'].forEach(id => {
     const ta = document.getElementById(id);
     ta.value = '';
     ta.style.height = '';
@@ -594,8 +639,11 @@ function openEdit(i) {
   editIndex = i;
   const h = history[i];
   document.getElementById('edit-name').value = h.name || '';
+  document.getElementById('edit-location').value = h.location || '';
   document.getElementById('edit-treatment').value = h.treatment || '';
   document.getElementById('edit-next').value = h.next || '';
+  document.getElementById('edit-nextloc').value = h.nextloc || '';
+  document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
   const modal = document.getElementById('editModal');
   modal.style.display = 'flex';
@@ -610,8 +658,11 @@ async function saveEdit() {
   if (editIndex === null) return;
   const h = history[editIndex];
   const name = document.getElementById('edit-name').value.trim();
+  const location = document.getElementById('edit-location').value.trim();
   const treatment = document.getElementById('edit-treatment').value.trim();
   const next = document.getElementById('edit-next').value.trim();
+  const nextloc = document.getElementById('edit-nextloc').value.trim();
+  const note = document.getElementById('edit-note').value.trim();
   const lab = document.getElementById('edit-lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
@@ -622,12 +673,12 @@ async function saveEdit() {
 
   try {
     if (h.id) {
-      const params = new URLSearchParams({ action: 'update', id: h.id, name, treatment, next, lab });
+      const params = new URLSearchParams({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
       const res = await fetch(scriptUrl + '?' + params.toString());
       const data = await res.json().catch(() => ({}));
       if (data.result !== 'success') throw new Error(data.error || 'Sheet 更新失敗');
     }
-    history[editIndex] = { ...h, name, treatment, next, lab };
+    history[editIndex] = { ...h, name, location, treatment, next, nextloc, note, lab };
     localStorage.setItem('dentalHistory', JSON.stringify(history));
     renderHistory();
     closeEdit();
