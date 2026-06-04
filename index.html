@@ -200,11 +200,18 @@
   <a href="#" onclick="showConfig()">點此設定 Apps Script 網址</a>
 </div>
 
+<!-- iOS 語音說明 -->
+<div id="iosBanner" style="display:none;background:#ebf8ff;border:1px solid #bee3f8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:0.85rem;color:#2c5282;line-height:1.7;">
+  📱 <strong>iPhone 語音輸入方式：</strong><br>
+  點欄位文字框 → 鍵盤出現後 → 點鍵盤上的 <strong>🎤</strong>（麥克風鍵）開始說話<br>
+  <span style="font-size:0.78rem;color:#4a7fa5;">若鍵盤沒有🎤，請至 設定 → 一般 → 鍵盤 → 開啟「語音輸入」</span>
+</div>
+
 <!-- 患者姓名 -->
 <div class="card">
   <div class="field-label">患者姓名</div>
   <div class="field-row">
-    <textarea id="name" rows="1" placeholder="輸入或語音辨識患者姓名"></textarea>
+    <textarea id="name" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-name" onclick="toggleVoice('name')" title="語音輸入">🎤</button>
   </div>
 </div>
@@ -213,7 +220,7 @@
 <div class="card">
   <div class="field-label">本次療程</div>
   <div class="field-row">
-    <textarea id="treatment" rows="3" placeholder="例：右上第一大臼齒根管治療第二次，沖洗並封藥"></textarea>
+    <textarea id="treatment" rows="3" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
   </div>
 </div>
@@ -222,7 +229,7 @@
 <div class="card">
   <div class="field-label">下次可能療程</div>
   <div class="field-row">
-    <textarea id="next" rows="3" placeholder="例：根管充填、暫時冠製作，建議一週後回診"></textarea>
+    <textarea id="next" rows="3" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
   </div>
 </div>
@@ -301,6 +308,14 @@ let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
 function init() {
   if (scriptUrl) {
     document.getElementById('configBanner').style.display = 'none';
+  }
+  if (isIOS) {
+    document.getElementById('iosBanner').style.display = 'block';
+    document.getElementById('statusBar').textContent = '點欄位 → 鍵盤出現 → 按鍵盤上的 🎤';
+    // iOS 上把 placeholder 改成清楚的提示
+    ['name','treatment','next'].forEach(id => {
+      document.getElementById(id).placeholder = '點此，鍵盤出現後按 🎤 說話';
+    });
   }
   checkSpeechSupport();
   renderHistory();
