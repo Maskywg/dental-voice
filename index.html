@@ -510,11 +510,11 @@ async function diagnoseMic() {
 async function testConnection() {
   setStatus('🔗 測試連線中...', true);
   try {
-    const params = new URLSearchParams({ action: 'insert', name: '測試', treatment: '連線測試', next: '', lab: '' });
-    const res = await fetch(scriptUrl + '?' + params.toString());
-    const data = await res.json();
+    const id = Date.now().toString();
+    const params = new URLSearchParams({ action: 'insert', id, name: '測試', treatment: '連線測試', next: '', lab: '' });
+    await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     showToast('✅ 連線測試成功！請查看 Google Sheet', 'success');
-    addHistory('測試', '連線測試（可刪除）', '', '', data.row || null);
+    addHistory('測試', '連線測試（可刪除）', '', '', id);
   } catch (err) {
     showToast('❌ 連線失敗：' + err.message, 'error');
   }
@@ -539,11 +539,10 @@ async function submitData() {
   btn.textContent = '上傳中...';
 
   try {
-    const params = new URLSearchParams({ action: 'insert', name, treatment, next, lab });
-    const res = await fetch(scriptUrl + '?' + params.toString());
-    const data = await res.json();
-    const row = data.row || null;
-    addHistory(name, treatment, next, lab, row);
+    const id = Date.now().toString();
+    const params = new URLSearchParams({ action: 'insert', id, name, treatment, next, lab });
+    await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+    addHistory(name, treatment, next, lab, id);
     showToast('✅ 上傳成功！', 'success');
     clearAll();
   } catch (err) {
@@ -554,9 +553,9 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
-function addHistory(name, treatment, next, lab, row) {
+function addHistory(name, treatment, next, lab, id) {
   const now = new Date().toLocaleTimeString('zh-TW');
-  history.unshift({ name, treatment, next, lab, time: now, row });
+  history.unshift({ name, treatment, next, lab, time: now, id });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
   renderHistory();
 }
@@ -573,7 +572,7 @@ function renderHistory() {
       <div class="h-row">本次：${h.treatment}</div>
       ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
-      <div class="h-time">${h.time}${h.row ? ` · 第${h.row}列` : ''}</div>
+      <div class="h-time">${h.time}</div>
     </div>
   `).join('');
 }
@@ -622,12 +621,10 @@ async function saveEdit() {
   saveBtn.textContent = '儲存中...';
 
   try {
-    if (h.row) {
-      // 有 row number，直接更新 Google Sheet
-      const params = new URLSearchParams({ action: 'update', row: h.row, name, treatment, next, lab });
-      await fetch(scriptUrl + '?' + params.toString());
+    if (h.id) {
+      const params = new URLSearchParams({ action: 'update', id: h.id, name, treatment, next, lab });
+      await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     }
-    // 更新本地紀錄
     history[editIndex] = { ...h, name, treatment, next, lab };
     localStorage.setItem('dentalHistory', JSON.stringify(history));
     renderHistory();
