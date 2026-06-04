@@ -270,6 +270,40 @@
   <button onclick="document.getElementById('iosGuide').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:8px 12px;font-size:0.9rem;cursor:pointer;">✕</button>
 </div>
 
+<!-- 編輯 Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:16px;align-items:flex-start;justify-content:center;overflow-y:auto;">
+  <div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:480px;margin-top:20px;">
+    <h3 style="margin-bottom:16px;color:#2b6cb0;">✏️ 修改紀錄</h3>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">患者姓名</div>
+      <input id="edit-name" type="text" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
+      <textarea id="edit-treatment" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
+      <textarea id="edit-next" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">技工所</div>
+      <select id="edit-lab" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:1rem;font-family:inherit;color:#2d3748;background:#f7fafc;">
+        <option value="">— 不需技工所 —</option>
+        <option value="美加">美加</option>
+        <option value="京典">京典</option>
+        <option value="平山">平山</option>
+        <option value="盛霖">盛霖</option>
+        <option value="柏創">柏創</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="saveEdit()" style="flex:1;padding:14px;background:#2b6cb0;color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;">💾 儲存修改</button>
+      <button onclick="closeEdit()" style="flex:1;padding:14px;background:#e2e8f0;color:#4a5568;border:none;border-radius:12px;font-size:1rem;cursor:pointer;">取消</button>
+    </div>
+  </div>
+</div>
+
 <!-- Config Modal -->
 <div id="configModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:24px;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;">
@@ -476,10 +510,11 @@ async function diagnoseMic() {
 async function testConnection() {
   setStatus('🔗 測試連線中...', true);
   try {
-    const params = new URLSearchParams({ name: '測試', treatment: '連線測試', next: '' });
-    await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+    const params = new URLSearchParams({ action: 'insert', name: '測試', treatment: '連線測試', next: '', lab: '' });
+    const res = await fetch(scriptUrl + '?' + params.toString());
+    const data = await res.json();
     showToast('✅ 連線測試成功！請查看 Google Sheet', 'success');
-    addHistory('測試', '連線測試（可刪除）', '');
+    addHistory('測試', '連線測試（可刪除）', '', '', data.row || null);
   } catch (err) {
     showToast('❌ 連線失敗：' + err.message, 'error');
   }
@@ -504,12 +539,11 @@ async function submitData() {
   btn.textContent = '上傳中...';
 
   try {
-    const params = new URLSearchParams({ name, treatment, next, lab });
-    await fetch(scriptUrl + '?' + params.toString(), {
-      method: 'GET',
-      mode: 'no-cors'
-    });
-    addHistory(name, treatment, next, lab);
+    const params = new URLSearchParams({ action: 'insert', name, treatment, next, lab });
+    const res = await fetch(scriptUrl + '?' + params.toString());
+    const data = await res.json();
+    const row = data.row || null;
+    addHistory(name, treatment, next, lab, row);
     showToast('✅ 上傳成功！', 'success');
     clearAll();
   } catch (err) {
@@ -520,9 +554,9 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
-function addHistory(name, treatment, next, lab) {
+function addHistory(name, treatment, next, lab, row) {
   const now = new Date().toLocaleTimeString('zh-TW');
-  history.unshift({ name, treatment, next, lab, time: now });
+  history.unshift({ name, treatment, next, lab, time: now, row });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
   renderHistory();
 }
@@ -530,13 +564,16 @@ function addHistory(name, treatment, next, lab) {
 function renderHistory() {
   const el = document.getElementById('historyList');
   if (!history.length) { el.innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">尚無紀錄</div>'; return; }
-  el.innerHTML = history.map(h => `
+  el.innerHTML = history.map((h, i) => `
     <div class="history-item">
-      <div class="h-name">👤 ${h.name}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="h-name">👤 ${h.name}</div>
+        <button onclick="openEdit(${i})" style="background:#ebf8ff;border:1px solid #bee3f8;color:#2b6cb0;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;flex-shrink:0;margin-left:8px;">✏️ 修改</button>
+      </div>
       <div class="h-row">本次：${h.treatment}</div>
       ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
-      <div class="h-time">${h.time}</div>
+      <div class="h-time">${h.time}${h.row ? ` · 第${h.row}列` : ''}</div>
     </div>
   `).join('');
 }
@@ -550,6 +587,58 @@ function clearAll() {
   });
   document.getElementById('lab').value = '';
   setStatus('點擊 🎤 開始語音輸入');
+}
+
+let editIndex = null;
+
+function openEdit(i) {
+  editIndex = i;
+  const h = history[i];
+  document.getElementById('edit-name').value = h.name || '';
+  document.getElementById('edit-treatment').value = h.treatment || '';
+  document.getElementById('edit-next').value = h.next || '';
+  document.getElementById('edit-lab').value = h.lab || '';
+  const modal = document.getElementById('editModal');
+  modal.style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('editModal').style.display = 'none';
+  editIndex = null;
+}
+
+async function saveEdit() {
+  if (editIndex === null) return;
+  const h = history[editIndex];
+  const name = document.getElementById('edit-name').value.trim();
+  const treatment = document.getElementById('edit-treatment').value.trim();
+  const next = document.getElementById('edit-next').value.trim();
+  const lab = document.getElementById('edit-lab').value;
+
+  if (!name) { showToast('請輸入患者姓名', 'error'); return; }
+
+  const saveBtn = document.querySelector('#editModal button');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '儲存中...';
+
+  try {
+    if (h.row) {
+      // 有 row number，直接更新 Google Sheet
+      const params = new URLSearchParams({ action: 'update', row: h.row, name, treatment, next, lab });
+      await fetch(scriptUrl + '?' + params.toString());
+    }
+    // 更新本地紀錄
+    history[editIndex] = { ...h, name, treatment, next, lab };
+    localStorage.setItem('dentalHistory', JSON.stringify(history));
+    renderHistory();
+    closeEdit();
+    showToast('✅ 修改已儲存', 'success');
+  } catch (err) {
+    showToast('儲存失敗：' + err.message, 'error');
+  }
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = '💾 儲存修改';
 }
 
 function clearHistory() {
