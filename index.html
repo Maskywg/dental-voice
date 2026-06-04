@@ -225,6 +225,19 @@
   </div>
 </div>
 
+<!-- 技工所 -->
+<div class="card">
+  <div class="field-label">技工所</div>
+  <select id="lab" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:1rem;font-family:inherit;color:#2d3748;background:#f7fafc;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22><path fill=%22%23718096%22 d=%22M5 7l5 5 5-5%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;">
+    <option value="">— 不需技工所 —</option>
+    <option value="美加">美加</option>
+    <option value="京典">京典</option>
+    <option value="平山">平山</option>
+    <option value="盛霖">盛霖</option>
+    <option value="柏創">柏創</option>
+  </select>
+</div>
+
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
@@ -481,6 +494,7 @@ async function submitData() {
   const name = document.getElementById('name').value.trim();
   const treatment = document.getElementById('treatment').value.trim();
   const next = document.getElementById('next').value.trim();
+  const lab = document.getElementById('lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
   if (!treatment) { showToast('請輸入本次療程', 'error'); return; }
@@ -490,12 +504,12 @@ async function submitData() {
   btn.textContent = '上傳中...';
 
   try {
-    const params = new URLSearchParams({ name, treatment, next });
+    const params = new URLSearchParams({ name, treatment, next, lab });
     await fetch(scriptUrl + '?' + params.toString(), {
       method: 'GET',
       mode: 'no-cors'
     });
-    addHistory(name, treatment, next);
+    addHistory(name, treatment, next, lab);
     showToast('✅ 上傳成功！', 'success');
     clearAll();
   } catch (err) {
@@ -506,9 +520,9 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
-function addHistory(name, treatment, next) {
+function addHistory(name, treatment, next, lab) {
   const now = new Date().toLocaleTimeString('zh-TW');
-  history.unshift({ name, treatment, next, time: now });
+  history.unshift({ name, treatment, next, lab, time: now });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
   renderHistory();
 }
@@ -521,6 +535,7 @@ function renderHistory() {
       <div class="h-name">👤 ${h.name}</div>
       <div class="h-row">本次：${h.treatment}</div>
       ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
+      ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
       <div class="h-time">${h.time}</div>
     </div>
   `).join('');
@@ -533,6 +548,7 @@ function clearAll() {
     ta.value = '';
     ta.style.height = '';
   });
+  document.getElementById('lab').value = '';
   setStatus('點擊 🎤 開始語音輸入');
 }
 
