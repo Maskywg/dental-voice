@@ -348,7 +348,10 @@
     <h3 style="margin-bottom:16px;color:#2b6cb0;">✏️ 修改紀錄</h3>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">患者姓名</div>
-      <input id="edit-name" type="text" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
+      <div class="field-row">
+        <input id="edit-name" type="text" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
+        <button class="mic-btn" id="mic-edit-name" onclick="toggleVoice('edit-name')" style="margin-top:0">🎤</button>
+      </div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次處置部位</div>
@@ -379,11 +382,17 @@
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
-      <textarea id="edit-treatment" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="field-row">
+        <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+        <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
+      </div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
-      <textarea id="edit-next" rows="3" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="field-row">
+        <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+        <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
+      </div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
@@ -414,7 +423,10 @@
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">交代事項</div>
-      <textarea id="edit-note" rows="2" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="field-row">
+        <textarea id="edit-note" rows="2" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+        <button class="mic-btn" id="mic-edit-note" onclick="toggleVoice('edit-note')" style="margin-top:0">🎤</button>
+      </div>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">技工所</div>
@@ -806,6 +818,7 @@ function openEdit(i) {
 }
 
 function closeEdit() {
+  stopVoice();
   document.getElementById('editModal').style.display = 'none';
   editIndex = null;
 }
