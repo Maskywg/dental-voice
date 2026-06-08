@@ -329,8 +329,11 @@
 
 <!-- 今日紀錄 -->
 <div class="card history-section" style="margin-top:20px;">
-  <div class="history-title">📋 本次已上傳紀錄</div>
-  <div id="historyList"><div style="color:#a0aec0;font-size:0.85rem;">尚無紀錄</div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div class="history-title" style="margin-bottom:0;">📋 今日所有上傳紀錄</div>
+    <button onclick="loadSharedHistory()" id="refreshBtn" style="background:#ebf8ff;border:1px solid #bee3f8;color:#2b6cb0;border-radius:8px;padding:5px 12px;font-size:0.8rem;cursor:pointer;">🔄 重新整理</button>
+  </div>
+  <div id="historyList"><div style="color:#a0aec0;font-size:0.85rem;">載入中...</div></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -507,7 +510,9 @@ function init() {
     });
   }
   checkSpeechSupport();
+  // 先顯示本地快取，再從 Sheet 拉最新共用紀錄
   renderHistory();
+  if (scriptUrl) loadSharedHistory();
 }
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -704,7 +709,32 @@ function addHistory(name, location, treatment, next, nextloc, note, lab, id) {
   const now = new Date().toLocaleTimeString('zh-TW');
   history.unshift({ name, location, treatment, next, nextloc, note, lab, time: now, id });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
-  renderHistory();
+  // 上傳後重新從 Sheet 讀取，讓所有人看到最新
+  setTimeout(loadSharedHistory, 1500);
+}
+
+// 從 Google Sheet 讀取今日所有紀錄（共用）
+async function loadSharedHistory() {
+  const btn = document.getElementById('refreshBtn');
+  if (btn) { btn.textContent = '⏳ 載入中...'; btn.disabled = true; }
+  try {
+    const res = await fetch(scriptUrl + '?action=getAll');
+    const data = await res.json();
+    if (data.result === 'success') {
+      // 更新 history（以 Sheet 為主，保留可修改）
+      history = data.rows.map(r => ({
+        name: r.name, location: r.location, treatment: r.treatment,
+        next: r.next, nextloc: r.nextloc, note: r.note, lab: r.lab,
+        time: r.time, id: r.id
+      }));
+      localStorage.setItem('dentalHistory', JSON.stringify(history));
+      renderHistory();
+    }
+  } catch(e) {
+    // 網路失敗：改用 localStorage 快取
+    renderHistory();
+  }
+  if (btn) { btn.textContent = '🔄 重新整理'; btn.disabled = false; }
 }
 
 function renderHistory() {
