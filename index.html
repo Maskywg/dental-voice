@@ -495,7 +495,33 @@ let recognition = null;
 let currentField = null;
 let isListening = false;
 let scriptUrl = localStorage.getItem('dentalScriptUrl') || 'https://script.google.com/macros/s/AKfycbzVfKrOK-6NECxs8OMRWdDiTOXrGj9OZUrOpeTRw1pYWr25MhrT88-Hjua8mC9iD1Qd/exec';
-let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
+let history = [];
+
+const STORAGE_KEY = 'dentalRecords_v1';
+
+async function loadSharedHistory() {
+  const btn = document.getElementById('refreshBtn');
+  if (btn) { btn.textContent = '⏳ 載入中...'; btn.disabled = true; }
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) {
+      history = JSON.parse(r.value);
+    }
+  } catch(e) {
+    // window.storage 不可用時降級用 localStorage
+    history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }
+  renderHistory();
+  if (btn) { btn.textContent = '🔄 重新整理'; btn.disabled = false; }
+}
+
+async function saveSharedHistory() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(history));
+  } catch(e) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  }
+}
 
 function init() {
   if (scriptUrl) {
@@ -504,15 +530,12 @@ function init() {
   if (isIOS) {
     document.getElementById('iosBanner').style.display = 'block';
     document.getElementById('statusBar').textContent = '點欄位 → 鍵盤出現 → 按鍵盤上的 🎤';
-    // iOS 上把 placeholder 改成清楚的提示
     ['name','treatment','next'].forEach(id => {
       document.getElementById(id).placeholder = '點此，鍵盤出現後按 🎤 說話';
     });
   }
   checkSpeechSupport();
-  // 先顯示本地快取，再從 Sheet 拉最新共用紀錄
-  renderHistory();
-  if (scriptUrl) loadSharedHistory();
+  loadSharedHistory();
 }
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -705,36 +728,11 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
-function addHistory(name, location, treatment, next, nextloc, note, lab, id) {
+async function addHistory(name, location, treatment, next, nextloc, note, lab, id) {
   const now = new Date().toLocaleTimeString('zh-TW');
   history.unshift({ name, location, treatment, next, nextloc, note, lab, time: now, id });
-  localStorage.setItem('dentalHistory', JSON.stringify(history));
-  // 上傳後重新從 Sheet 讀取，讓所有人看到最新
-  setTimeout(loadSharedHistory, 1500);
-}
-
-// 從 Google Sheet 讀取今日所有紀錄（共用）
-async function loadSharedHistory() {
-  const btn = document.getElementById('refreshBtn');
-  if (btn) { btn.textContent = '⏳ 載入中...'; btn.disabled = true; }
-  try {
-    const res = await fetch(scriptUrl + '?action=getAll');
-    const data = await res.json();
-    if (data.result === 'success') {
-      // 更新 history（以 Sheet 為主，保留可修改）
-      history = data.rows.map(r => ({
-        name: r.name, location: r.location, treatment: r.treatment,
-        next: r.next, nextloc: r.nextloc, note: r.note, lab: r.lab,
-        time: r.time, id: r.id
-      }));
-      localStorage.setItem('dentalHistory', JSON.stringify(history));
-      renderHistory();
-    }
-  } catch(e) {
-    // 網路失敗：改用 localStorage 快取
-    renderHistory();
-  }
-  if (btn) { btn.textContent = '🔄 重新整理'; btn.disabled = false; }
+  await saveSharedHistory();
+  renderHistory();
 }
 
 function renderHistory() {
@@ -876,7 +874,7 @@ async function saveEdit() {
       await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     }
     history[editIndex] = { ...h, name, location, treatment, next, nextloc, note, lab };
-    localStorage.setItem('dentalHistory', JSON.stringify(history));
+    await saveSharedHistory();
     renderHistory();
     closeEdit();
     showToast('✅ 修改已儲存', 'success');
@@ -888,10 +886,10 @@ async function saveEdit() {
   saveBtn.textContent = '💾 儲存修改';
 }
 
-function clearHistory() {
+async function clearHistory() {
   if (!confirm('確定要清除今日所有紀錄？')) return;
   history = [];
-  localStorage.removeItem('dentalHistory');
+  await saveSharedHistory();
   renderHistory();
   showToast('今日紀錄已清除');
 }
