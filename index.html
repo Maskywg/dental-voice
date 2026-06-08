@@ -843,9 +843,7 @@ async function saveEdit() {
   try {
     if (h.id) {
       const params = new URLSearchParams({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
-      const res = await fetch(scriptUrl + '?' + params.toString());
-      const data = await res.json().catch(() => ({}));
-      if (data.result !== 'success') throw new Error(data.error || 'Sheet 更新失敗');
+      await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     }
     history[editIndex] = { ...h, name, location, treatment, next, nextloc, note, lab };
     localStorage.setItem('dentalHistory', JSON.stringify(history));
