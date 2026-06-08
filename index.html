@@ -494,7 +494,10 @@ const APPS_SCRIPT_CODE = `function doGet(e) {
 let recognition = null;
 let currentField = null;
 let isListening = false;
-let scriptUrl = localStorage.getItem('dentalScriptUrl') || 'https://script.google.com/macros/s/AKfycbzeyMtd02P5VqPjUPNUnyGk7lTBarJHAE9eb9iqRBZm3YBWR85kK_zqBZ30nyPdBHg5/exec';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeyMtd02P5VqPjUPNUnyGk7lTBarJHAE9eb9iqRBZm3YBWR85kK_zqBZ30nyPdBHg5/exec';
+// 永遠以程式碼內建網址為主，避免舊裝置用到過期的 localStorage
+let scriptUrl = DEFAULT_SCRIPT_URL;
+localStorage.setItem('dentalScriptUrl', DEFAULT_SCRIPT_URL);
 let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
 
 async function loadSharedHistory() {
