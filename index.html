@@ -494,7 +494,7 @@ const APPS_SCRIPT_CODE = `function doGet(e) {
 let recognition = null;
 let currentField = null;
 let isListening = false;
-let scriptUrl = localStorage.getItem('dentalScriptUrl') || 'https://script.google.com/macros/s/AKfycbxiGbJpcqJ-Erur13irNeu1VuHNTMZAC9Av1o6SE_VrHFAObanDAha205S9AxXHEnZw/exec';
+let scriptUrl = localStorage.getItem('dentalScriptUrl') || 'https://script.google.com/macros/s/AKfycbwfPD_Wu29v9LvmceFXUCb8NRKFWwMUuBxnNGqDYLwzv_nrl5e5qdL5Koi-MXxnwwlR/exec';
 let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
 
 async function loadSharedHistory() {
