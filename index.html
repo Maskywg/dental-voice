@@ -503,12 +503,12 @@ async function loadSharedHistory() {
   try {
     const res = await fetch(scriptUrl + '?action=getAll');
     const data = await res.json();
-    if (data.result === 'success' && Array.isArray(data.rows)) {
+    if (data.result === 'success' && Array.isArray(data.rows) && data.rows.length > 0) {
       history = data.rows;
       localStorage.setItem('dentalHistory', JSON.stringify(history));
     }
   } catch(e) {
-    // 網路失敗時用本機快取
+    // 網路失敗或 CORS 擋住時用本機快取
   }
   renderHistory();
   if (btn) { btn.textContent = '🔄 重新整理'; btn.disabled = false; }
