@@ -308,9 +308,10 @@
 <div class="card">
   <div class="field-label">交代事項</div>
   <div class="field-row">
-    <textarea id="note" rows="2" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <textarea id="note" rows="2" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
     <button class="mic-btn" id="mic-note" onclick="toggleVoice('note')" title="語音輸入">🎤</button>
   </div>
+  <div class="quick-chips" id="qc-note"></div>
 </div>
 
 <!-- 技工所 -->
@@ -439,6 +440,7 @@
         <textarea id="edit-note" rows="2" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
         <button class="mic-btn" id="mic-edit-note" onclick="toggleVoice('edit-note')" style="margin-top:0">🎤</button>
       </div>
+      <div class="quick-chips" id="qc-edit-note"></div>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">技工所</div>
@@ -544,6 +546,8 @@ function init() {
   renderQuickChips('qc-next', 'next');
   renderQuickChips('qc-edit-treatment', 'edit-treatment');
   renderQuickChips('qc-edit-next', 'edit-next');
+  renderQuickChips('qc-note', 'note', true);
+  renderQuickChips('qc-edit-note', 'edit-note', true);
 }
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -954,6 +958,14 @@ const QUICK_TERMS = [
   { group: '檢查影像', terms: ['拍X光', '拍CT', '拍數位X光', '拍全口', '拆線', '檢查', '問矯正'] },
 ];
 
+const QUICK_NOTES = [
+  { group: '衛教', terms: ['手術衛教', '單數毛衛教', '臨時假牙衛教', '會痛要來'] },
+  { group: '費用', terms: ['不收', '退費', '訂金'] },
+  { group: '義齒器具', terms: ['活動帶來', '上顎活動帶來', '下顎活動留診所', '上顎活動送回'] },
+  { group: '特殊注意', terms: ['要簽名', '下次測血壓', '不開單', '重拍X光'] },
+  { group: '約診', terms: ['暫不約', '要趕'] },
+];
+
 function appendQuickTerm(fieldId, term) {
   const ta = document.getElementById(fieldId);
   const cur = ta.value;
@@ -962,10 +974,11 @@ function appendQuickTerm(fieldId, term) {
   ta.focus();
 }
 
-function renderQuickChips(containerId, fieldId) {
+function renderQuickChips(containerId, fieldId, isNote = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  el.innerHTML = QUICK_TERMS.map(g => `
+  const list = isNote ? QUICK_NOTES : QUICK_TERMS;
+  el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
     <div class="qc-group">
       ${g.terms.map(t => `<button class="qc-btn" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
