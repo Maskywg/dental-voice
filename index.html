@@ -194,6 +194,11 @@
   .loc-chip.selected { background: #2b6cb0; border-color: #2b6cb0; color: white; font-weight: 600; }
   .loc-result { font-size: 0.85rem; color: #718096; margin-top: 6px; min-height: 20px; }
   .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
+  .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
+  .qc-divider { width: 100%; font-size: 0.7rem; color: #a0aec0; font-weight: 600; letter-spacing: 0.05em; margin: 4px 0 2px; text-transform: uppercase; }
+  .qc-btn { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #bee3f8; background: #ebf8ff; font-size: 0.82rem; color: #2b6cb0; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .qc-btn:active { background: #2b6cb0; color: white; transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -254,18 +259,20 @@
 <div class="card">
   <div class="field-label">本次療程</div>
   <div class="field-row">
-    <textarea id="treatment" rows="3" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <textarea id="treatment" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
     <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
   </div>
+  <div class="quick-chips" id="qc-treatment"></div>
 </div>
 
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
   <div class="field-row">
-    <textarea id="next" rows="3" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
+    <textarea id="next" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
     <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
   </div>
+  <div class="quick-chips" id="qc-next"></div>
 </div>
 
 <!-- 下次處置部位 -->
@@ -389,6 +396,7 @@
         <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
         <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
       </div>
+      <div class="quick-chips" id="qc-edit-treatment"></div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
@@ -396,6 +404,7 @@
         <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
         <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
       </div>
+      <div class="quick-chips" id="qc-edit-next"></div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
@@ -530,6 +539,11 @@ function init() {
   }
   checkSpeechSupport();
   loadSharedHistory();
+  // 初始化快速詞按鈕
+  renderQuickChips('qc-treatment', 'treatment');
+  renderQuickChips('qc-next', 'next');
+  renderQuickChips('qc-edit-treatment', 'edit-treatment');
+  renderQuickChips('qc-edit-next', 'edit-next');
 }
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -928,6 +942,35 @@ function copyScript() {
   navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
     showToast('程式碼已複製', 'success');
   });
+}
+
+// ── 快速療程詞彙 ──
+const QUICK_TERMS = [
+  { group: '洗牙', terms: ['洗牙', 'H洗牙', 'DM洗牙', '高風險洗牙', '局部洗牙', '牙菌斑照護', '塗氟'] },
+  { group: '根管', terms: ['RCF', 'Endo', 'P1', 'P2', '裝P', '重新RCF'] },
+  { group: '補牙假牙', terms: ['OD', '印模', '重印', '咬高度', '裝臨時', '裝牙', '已裝牙', '裝活動', '釘子', '拆釘子', '裝二階'] },
+  { group: '拔牙手術', terms: ['拔牙', '簡單拔牙', '複雜拔牙', '拆牙', '牙週緊急處理', '骨再生手術'] },
+  { group: '矯正', terms: ['換線', '拆矯正', '裝維持器', '印維持器', '檢擴張'] },
+  { group: '檢查影像', terms: ['拍X光', '拍CT', '拍數位X光', '拍全口', '拆線', '檢查', '問矯正'] },
+];
+
+function appendQuickTerm(fieldId, term) {
+  const ta = document.getElementById(fieldId);
+  const cur = ta.value;
+  ta.value = cur ? cur + '\n' + term : term;
+  autoResize(ta);
+  ta.focus();
+}
+
+function renderQuickChips(containerId, fieldId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = QUICK_TERMS.map(g => `
+    <div class="qc-divider">${g.group}</div>
+    <div class="qc-group">
+      ${g.terms.map(t => `<button class="qc-btn" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
+    </div>
+  `).join('');
 }
 
 // 讓 textarea 自動撐高
