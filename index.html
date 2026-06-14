@@ -819,41 +819,31 @@ function setLocChips(fieldId, valueStr) {
   });
 }
 
-let _audioCtx = null;
-function getAudioCtx() {
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return _audioCtx;
+// ── 提示音（用 Audio 元素，iOS 相容性最佳）──
+const _beepSrc = 'data:audio/wav;base64,UklGRtAUAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YawUAAAAAA4T6yR5NL9A+EihTH5Lo0VsO34ttxwlCvH2TeRl00fF1bq3tE+zs7asvrzKINrj6+j+/hH1I6szJ0CfSIxMr0sXRhw8Xi66HToLB/hT5UrU/cVRu/G0QrNhthq+88kt2dXq0P3tEPwi2zKLP0JIdEzdS4hGyTw8L7weTwwe+VrmMtW2xtC7LrU6sxO2jL0uyT3Yyem4/NwPAiIIMuw+4UdXTAZM9EZyPRgwvB9jDTX6Y+cb1nLHU7xvtTWzybUCvWvITte96KH7yQ4GITIxSj59RzdMLExeRxk+8TCKIHcOTftt6AfXMcjZvLS1NbODtXq8q8di1rPnifq2DQggWjClPRRHEkxOTMNHvD7IMbchiQ9k/Hjp9dfzyGK9/bU4s0G197vuxnfVquZy+aIMCR9/L/w8qUbqS2tMJUhcP5wysSKbEHz9herl2LjJ771Jtj+zA7V3uzTGj9Si5Vv4jQsIHqEuUDw5Rr1LhUyDSPg/bTOqI6wRlP6S69fZf8qAvpq2S7PItPq6fcWp04zkRPd4CgUdwi2hO8ZFjUubTN5IkkA8NKEkvBKs/6Hsy9pJyxS/7rZas5K0gbrJxMbSl+Mu9mIJARzfLO86T0VZS61MNEkoQQg1lyXME8QAsO3B2xfMq79Gt22zX7QMuhnE5dGT4hn1TAj8GvsrOjrVRCFLukyHSbpB0TWKJtoU3AHB7rnc5sxGwKK3hbMwtJq5a8MG0ZHhBPQ2B/UZFCuCOVdE5UrETNZJSUKXNnsn5xX0AtLvs925zeTAAbigswa0LLnAwirQkeDw8h4G7BgrKsc41UOlSspMIUrVQls3aijzFgsE5PCu3o7OhcFluL+z37PBuBnCUM+S39zxBwXjF0ApCThQQ2FKzExoSl1DDDhYKf0XIwX38avfZc8pwsy44rO8s1u4dcF4zpXeyfDvA9gWUyhIN8dCGkrKTKxK4kPaOEMqBxk6BgvzquA/0NHCN7kKtJ2z+LfUwKTNmt2374CxFCYkDFG4XSOG0VRnuVx9Zf2ZTohChv44nwdFKMSDWGNE/D2MXmrBbMTmDvTpTiDaRLsUjxBZfCH05CKaIHcOTftt6AfXMcjZvLS1NbODtXq8q8di1rPnifq2DQ==';
+let _beepAudio = null;
+
+function _getBeep() {
+  if (!_beepAudio) {
+    _beepAudio = new Audio(_beepSrc);
+    _beepAudio.volume = 0.8;
+  }
+  return _beepAudio;
 }
 
-// iOS 需要在第一次觸碰時就解鎖 AudioContext，之後 await 後才能播音
-function unlockAudio() {
-  const ctx = getAudioCtx();
-  if (ctx.state === 'suspended') ctx.resume();
-  // 播一個無聲短音解鎖
-  const buf = ctx.createBuffer(1, 1, 22050);
-  const src = ctx.createBufferSource();
-  src.buffer = buf;
-  src.connect(ctx.destination);
-  src.start(0);
+// 首次觸碰解鎖 Audio（iOS 限制）
+function _unlockBeep() {
+  const a = _getBeep();
+  a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
 }
-document.addEventListener('touchstart', unlockAudio, { once: true });
-document.addEventListener('mousedown', unlockAudio, { once: true });
+document.addEventListener('touchstart', _unlockBeep, { once: true });
+document.addEventListener('mousedown', _unlockBeep, { once: true });
 
 function playBell() {
   try {
-    const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-    [523, 659, 784].forEach((freq, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sine';
-      o.frequency.value = freq;
-      const t = ctx.currentTime + i * 0.15;
-      g.gain.setValueAtTime(0.5, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-      o.start(t); o.stop(t + 0.5);
-    });
+    const a = _getBeep();
+    a.currentTime = 0;
+    a.play().catch(() => {});
   } catch(e) {}
 }
 
