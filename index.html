@@ -897,6 +897,7 @@ async function saveEdit() {
   saveBtn.textContent = '儲存中...';
 
   try {
+    playBell(); // 在 await 之前播音，確保 iOS 有聲
     if (h.id) {
       const params = new URLSearchParams({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
       await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
