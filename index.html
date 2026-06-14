@@ -704,7 +704,8 @@ async function testConnection() {
 }
 
 async function submitData() {
-  getAudioCtx(); // 在手勢當下先初始化，解鎖音頻
+  // 在手勢當下立刻初始化並播音，await 之後 iOS 會失去音頻授權
+  getAudioCtx();
   if (!scriptUrl) {
     showConfig();
     return;
@@ -727,9 +728,9 @@ async function submitData() {
   try {
     const id = Date.now().toString();
     const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
+    playBell(); // ← 移到 await 之前，確保在用戶手勢內播放
     await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     addHistory(name, location, treatment, next, nextloc, note, lab, id);
-    playBell();
     showToast('✅ 上傳成功！', 'success');
     clearAll();
   } catch (err) {
