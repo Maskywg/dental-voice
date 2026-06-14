@@ -329,7 +329,7 @@
 
 <div class="status-bar" id="statusBar">點擊 🎤 開始語音輸入</div>
 
-<button class="submit-btn" onclick="submitData()" id="submitBtn">上傳至 Google Sheet</button>
+<button class="submit-btn" onclick="playBell(); submitData()" id="submitBtn">上傳至 Google Sheet</button>
 <button class="clear-btn" onclick="testConnection()" style="margin-top:8px;color:#2b6cb0;border-color:#bee3f8;">🔗 測試 Google Sheet 連線</button>
 <button class="clear-btn" onclick="diagnoseMic()" style="margin-top:4px;color:#805ad5;border-color:#e9d8fd;">🔍 語音診斷</button>
 <button class="clear-btn" onclick="clearAll()">清除重填</button>
@@ -454,7 +454,7 @@
       </select>
     </div>
     <div style="display:flex;gap:10px;">
-      <button onclick="saveEdit()" style="flex:1;padding:14px;background:#2b6cb0;color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;">💾 儲存修改</button>
+      <button onclick="playBell(); saveEdit()" style="flex:1;padding:14px;background:#2b6cb0;color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;">💾 儲存修改</button>
       <button onclick="closeEdit()" style="flex:1;padding:14px;background:#e2e8f0;color:#4a5568;border:none;border-radius:12px;font-size:1rem;cursor:pointer;">取消</button>
     </div>
   </div>
@@ -728,7 +728,6 @@ async function submitData() {
   try {
     const id = Date.now().toString();
     const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
-    playBell(); // ← 移到 await 之前，確保在用戶手勢內播放
     await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     addHistory(name, location, treatment, next, nextloc, note, lab, id);
     showToast('✅ 上傳成功！', 'success');
@@ -887,7 +886,6 @@ async function saveEdit() {
   saveBtn.textContent = '儲存中...';
 
   try {
-    playBell(); // 在 await 之前播音，確保 iOS 有聲
     if (h.id) {
       const params = new URLSearchParams({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
       await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
