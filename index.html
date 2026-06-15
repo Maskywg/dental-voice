@@ -192,7 +192,10 @@
   .loc-group { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
   .loc-chip { padding: 7px 13px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: #f7fafc; font-size: 0.9rem; color: #4a5568; cursor: pointer; user-select: none; transition: all 0.15s; font-family: inherit; }
   .loc-chip.selected { background: #2b6cb0; border-color: #2b6cb0; color: white; font-weight: 600; }
-  .loc-result { font-size: 0.85rem; color: #718096; margin-top: 6px; min-height: 20px; }
+  .loc-result { font-size: 0.85rem; color: #718096; margin-top: 6px; min-height: 20px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .loc-tag { display: inline-flex; align-items: center; background: #2b6cb0; color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.85rem; }
+  .loc-tag-del { background: none; border: none; color: white; cursor: pointer; padding: 0 0 0 4px; font-size: 1rem; line-height: 1; }
+  .loc-chip.pending { background: #ebf8ff; border-color: #63b3ed; color: #2b6cb0; font-weight: 600; }
   .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
@@ -229,27 +232,25 @@
 <!-- 本次處置部位 -->
 <div class="card">
   <div class="field-label">本次處置部位</div>
-  <div class="loc-group" id="loc-area-chips">
-    <button class="loc-chip" onclick="toggleChip('location','左上',this)">左上</button>
-    <button class="loc-chip" onclick="toggleChip('location','左下',this)">左下</button>
-    <button class="loc-chip" onclick="toggleChip('location','右上',this)">右上</button>
-    <button class="loc-chip" onclick="toggleChip('location','右下',this)">右下</button>
-    <button class="loc-chip" onclick="toggleChip('location','全口',this)">全口</button>
-    <button class="loc-chip" onclick="toggleChip('location','上顎',this)">上顎</button>
-    <button class="loc-chip" onclick="toggleChip('location','下顎',this)">下顎</button>
+  <div class="loc-group" data-loc-quad-group="location">
+    <button class="loc-chip" data-loc-quad="location" onclick="toggleQuadrant('location','左上',this)">左上</button>
+    <button class="loc-chip" data-loc-quad="location" onclick="toggleQuadrant('location','左下',this)">左下</button>
+    <button class="loc-chip" data-loc-quad="location" onclick="toggleQuadrant('location','右上',this)">右上</button>
+    <button class="loc-chip" data-loc-quad="location" onclick="toggleQuadrant('location','右下',this)">右下</button>
+    <button class="loc-chip" onclick="toggleQuadrant('location','全口',this)">全口</button>
+    <button class="loc-chip" onclick="toggleQuadrant('location','上顎',this)">上顎</button>
+    <button class="loc-chip" onclick="toggleQuadrant('location','下顎',this)">下顎</button>
   </div>
   <div class="loc-divider"></div>
   <div class="loc-group">
-    <button class="loc-chip" onclick="toggleChip('location','0',this)">0</button>
-    <button class="loc-chip" onclick="toggleChip('location','1',this)">1</button>
-    <button class="loc-chip" onclick="toggleChip('location','2',this)">2</button>
-    <button class="loc-chip" onclick="toggleChip('location','3',this)">3</button>
-    <button class="loc-chip" onclick="toggleChip('location','4',this)">4</button>
-    <button class="loc-chip" onclick="toggleChip('location','5',this)">5</button>
-    <button class="loc-chip" onclick="toggleChip('location','6',this)">6</button>
-    <button class="loc-chip" onclick="toggleChip('location','7',this)">7</button>
-    <button class="loc-chip" onclick="toggleChip('location','8',this)">8</button>
-    <button class="loc-chip" onclick="toggleChip('location','9',this)">9</button>
+    <button class="loc-chip" onclick="selectTooth('location','1')">1</button>
+    <button class="loc-chip" onclick="selectTooth('location','2')">2</button>
+    <button class="loc-chip" onclick="selectTooth('location','3')">3</button>
+    <button class="loc-chip" onclick="selectTooth('location','4')">4</button>
+    <button class="loc-chip" onclick="selectTooth('location','5')">5</button>
+    <button class="loc-chip" onclick="selectTooth('location','6')">6</button>
+    <button class="loc-chip" onclick="selectTooth('location','7')">7</button>
+    <button class="loc-chip" onclick="selectTooth('location','8')">8</button>
   </div>
   <div class="loc-result" id="location-result">尚未選擇</div>
   <input type="hidden" id="location" value="">
@@ -278,27 +279,25 @@
 <!-- 下次處置部位 -->
 <div class="card">
   <div class="field-label">下次處置部位</div>
-  <div class="loc-group">
-    <button class="loc-chip" onclick="toggleChip('nextloc','左上',this)">左上</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','左下',this)">左下</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','右上',this)">右上</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','右下',this)">右下</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','全口',this)">全口</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','上顎',this)">上顎</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','下顎',this)">下顎</button>
+  <div class="loc-group" data-loc-quad-group="nextloc">
+    <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左上',this)">左上</button>
+    <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左下',this)">左下</button>
+    <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','右上',this)">右上</button>
+    <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','右下',this)">右下</button>
+    <button class="loc-chip" onclick="toggleQuadrant('nextloc','全口',this)">全口</button>
+    <button class="loc-chip" onclick="toggleQuadrant('nextloc','上顎',this)">上顎</button>
+    <button class="loc-chip" onclick="toggleQuadrant('nextloc','下顎',this)">下顎</button>
   </div>
   <div class="loc-divider"></div>
   <div class="loc-group">
-    <button class="loc-chip" onclick="toggleChip('nextloc','0',this)">0</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','1',this)">1</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','2',this)">2</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','3',this)">3</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','4',this)">4</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','5',this)">5</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','6',this)">6</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','7',this)">7</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','8',this)">8</button>
-    <button class="loc-chip" onclick="toggleChip('nextloc','9',this)">9</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','1')">1</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','2')">2</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','3')">3</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','4')">4</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','5')">5</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','6')">6</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','7')">7</button>
+    <button class="loc-chip" onclick="selectTooth('nextloc','8')">8</button>
   </div>
   <div class="loc-result" id="nextloc-result">尚未選擇</div>
   <input type="hidden" id="nextloc" value="">
@@ -366,27 +365,25 @@
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次處置部位</div>
-      <div class="loc-group">
-        <button class="loc-chip" onclick="toggleChip('edit-location','左上',this)">左上</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','左下',this)">左下</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','右上',this)">右上</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','右下',this)">右下</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','全口',this)">全口</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','上顎',this)">上顎</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','下顎',this)">下顎</button>
+      <div class="loc-group" data-loc-quad-group="edit-location">
+        <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','左上',this)">左上</button>
+        <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','左下',this)">左下</button>
+        <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','右上',this)">右上</button>
+        <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','右下',this)">右下</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-location','全口',this)">全口</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-location','上顎',this)">上顎</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-location','下顎',this)">下顎</button>
       </div>
       <div class="loc-divider"></div>
       <div class="loc-group">
-        <button class="loc-chip" onclick="toggleChip('edit-location','0',this)">0</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','1',this)">1</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','2',this)">2</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','3',this)">3</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','4',this)">4</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','5',this)">5</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','6',this)">6</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','7',this)">7</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','8',this)">8</button>
-        <button class="loc-chip" onclick="toggleChip('edit-location','9',this)">9</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','1')">1</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','2')">2</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','3')">3</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','4')">4</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','5')">5</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','6')">6</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','7')">7</button>
+        <button class="loc-chip" onclick="selectTooth('edit-location','8')">8</button>
       </div>
       <div class="loc-result" id="edit-location-result">尚未選擇</div>
       <input type="hidden" id="edit-location" value="">
@@ -410,26 +407,24 @@
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
       <div class="loc-group">
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','左上',this)">左上</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','左下',this)">左下</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','右上',this)">右上</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','右下',this)">右下</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','全口',this)">全口</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','上顎',this)">上顎</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','下顎',this)">下顎</button>
+        <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','左上',this)">左上</button>
+        <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','左下',this)">左下</button>
+        <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','右上',this)">右上</button>
+        <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','右下',this)">右下</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-nextloc','全口',this)">全口</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-nextloc','上顎',this)">上顎</button>
+        <button class="loc-chip" onclick="toggleQuadrant('edit-nextloc','下顎',this)">下顎</button>
       </div>
       <div class="loc-divider"></div>
       <div class="loc-group">
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','0',this)">0</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','1',this)">1</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','2',this)">2</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','3',this)">3</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','4',this)">4</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','5',this)">5</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','6',this)">6</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','7',this)">7</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','8',this)">8</button>
-        <button class="loc-chip" onclick="toggleChip('edit-nextloc','9',this)">9</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','1')">1</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','2')">2</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','3')">3</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','4')">4</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','5')">5</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','6')">6</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','7')">7</button>
+        <button class="loc-chip" onclick="selectTooth('edit-nextloc','8')">8</button>
       </div>
       <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
       <input type="hidden" id="edit-nextloc" value="">
@@ -780,40 +775,74 @@ function clearAll() {
 
 // ── 處置部位 chip 邏輯 ──
 const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
+const locPendingQuad = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
+const LOC_DIRECT = ['全口', '上顎', '下顎'];
 
-function toggleChip(fieldId, value, btn) {
+function toggleQuadrant(fieldId, quad, btn) {
+  if (LOC_DIRECT.includes(quad)) {
+    addLocItem(fieldId, quad);
+    return;
+  }
+  const pending = locPendingQuad[fieldId];
+  const idx = pending.indexOf(quad);
+  if (idx === -1) {
+    pending.push(quad);
+    btn.classList.add('pending');
+  } else {
+    pending.splice(idx, 1);
+    btn.classList.remove('pending');
+  }
+}
+
+function selectTooth(fieldId, num) {
+  const pending = locPendingQuad[fieldId];
+  if (pending.length === 0) {
+    addLocItem(fieldId, num);
+  } else {
+    pending.forEach(q => addLocItem(fieldId, q + num));
+    clearPendingQuad(fieldId);
+  }
+}
+
+function addLocItem(fieldId, value) {
+  const sel = locSelections[fieldId];
+  if (!sel.includes(value)) sel.push(value);
+  updateLocDisplay(fieldId);
+}
+
+function removeLocItem(fieldId, value) {
   const sel = locSelections[fieldId];
   const idx = sel.indexOf(value);
-  if (idx === -1) {
-    sel.push(value);
-    btn.classList.add('selected');
-  } else {
-    sel.splice(idx, 1);
-    btn.classList.remove('selected');
-  }
-  const joined = sel.join(' ');
-  document.getElementById(fieldId).value = joined;
-  const resultEl = document.getElementById(fieldId + '-result');
-  if (resultEl) resultEl.textContent = joined || '尚未選擇';
+  if (idx !== -1) sel.splice(idx, 1);
+  updateLocDisplay(fieldId);
+}
+
+function clearPendingQuad(fieldId) {
+  locPendingQuad[fieldId] = [];
+  document.querySelectorAll(`[data-loc-quad="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
+}
+
+function updateLocDisplay(fieldId) {
+  const sel = locSelections[fieldId];
+  document.getElementById(fieldId).value = sel.join(' ');
+  const el = document.getElementById(fieldId + '-result');
+  if (!el) return;
+  if (sel.length === 0) { el.innerHTML = '<span style="color:#a0aec0">尚未選擇</span>'; return; }
+  el.innerHTML = sel.map(v =>
+    `<span class="loc-tag">${v}<button class="loc-tag-del" onclick="removeLocItem('${fieldId}','${v}')">×</button></span>`
+  ).join('');
 }
 
 function clearLocChips(fieldId) {
   locSelections[fieldId] = [];
-  document.getElementById(fieldId).value = '';
-  const resultEl = document.getElementById(fieldId + '-result');
-  if (resultEl) resultEl.textContent = '尚未選擇';
-  // 取消所有 chip 選取
-  document.querySelectorAll(`[onclick*="toggleChip('${fieldId}'"]`).forEach(b => b.classList.remove('selected'));
+  clearPendingQuad(fieldId);
+  updateLocDisplay(fieldId);
 }
 
 function setLocChips(fieldId, valueStr) {
   clearLocChips(fieldId);
   if (!valueStr) return;
-  valueStr.split(' ').forEach(v => {
-    const btn = [...document.querySelectorAll(`[onclick*="toggleChip('${fieldId}'"]`)]
-      .find(b => b.textContent.trim() === v);
-    if (btn) toggleChip(fieldId, v, btn);
-  });
+  valueStr.split(' ').filter(Boolean).forEach(v => addLocItem(fieldId, v));
 }
 
 // ── 提示音（用 Audio 元素，iOS 相容性最佳）──
