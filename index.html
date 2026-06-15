@@ -727,8 +727,8 @@ async function submitData() {
 
   try {
     const id = Date.now().toString();
-    const payload = JSON.stringify({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
-    await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: payload });
+    const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
+    await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     addHistory(name, location, treatment, next, nextloc, note, lab, id);
     showToast('✅ 上傳成功！', 'success');
     clearAll();
@@ -887,8 +887,8 @@ async function saveEdit() {
 
   try {
     if (h.id) {
-      const payload = JSON.stringify({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
-      await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: payload });
+      const params = new URLSearchParams({ action: 'update', id: h.id, name, location, treatment, next, nextloc, note, lab });
+      await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     }
     history[editIndex] = { ...h, name, location, treatment, next, nextloc, note, lab };
     localStorage.setItem('dentalHistory', JSON.stringify(history));
