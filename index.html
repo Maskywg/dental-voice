@@ -194,8 +194,10 @@
   .loc-chip.selected { background: #2b6cb0; border-color: #2b6cb0; color: white; font-weight: 600; }
   .loc-result { font-size: 0.85rem; color: #718096; margin-top: 6px; min-height: 20px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
   .loc-tag { display: inline-flex; align-items: center; background: #2b6cb0; color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.85rem; }
-  .loc-tag-del { background: none; border: none; color: white; cursor: pointer; padding: 0 0 0 4px; font-size: 1rem; line-height: 1; }
+  .loc-tag-del { background: none; border: none; color: white; cursor: pointer; padding: 0 0 0 5px; font-size: 0.8rem; line-height: 1; opacity: 0.85; }
   .loc-chip.pending { background: #ebf8ff; border-color: #63b3ed; color: #2b6cb0; font-weight: 600; }
+  .loc-chip-confirm { background: #276749 !important; border-color: #276749 !important; color: white !important; font-weight: 600; }
+  .loc-preview { font-size: 0.85rem; color: #2b6cb0; min-height: 18px; margin: 4px 0 2px; font-weight: 600; }
   .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
@@ -243,16 +245,20 @@
   </div>
   <div class="loc-divider"></div>
   <div class="loc-group">
-    <button class="loc-chip" onclick="selectTooth('location','1')">1</button>
-    <button class="loc-chip" onclick="selectTooth('location','2')">2</button>
-    <button class="loc-chip" onclick="selectTooth('location','3')">3</button>
-    <button class="loc-chip" onclick="selectTooth('location','4')">4</button>
-    <button class="loc-chip" onclick="selectTooth('location','5')">5</button>
-    <button class="loc-chip" onclick="selectTooth('location','6')">6</button>
-    <button class="loc-chip" onclick="selectTooth('location','7')">7</button>
-    <button class="loc-chip" onclick="selectTooth('location','8')">8</button>
+    <button class="loc-chip" onclick="appendTooth('location','1')">1</button>
+    <button class="loc-chip" onclick="appendTooth('location','2')">2</button>
+    <button class="loc-chip" onclick="appendTooth('location','3')">3</button>
+    <button class="loc-chip" onclick="appendTooth('location','4')">4</button>
+    <button class="loc-chip" onclick="appendTooth('location','5')">5</button>
+    <button class="loc-chip" onclick="appendTooth('location','6')">6</button>
+    <button class="loc-chip" onclick="appendTooth('location','7')">7</button>
+    <button class="loc-chip" onclick="appendTooth('location','8')">8</button>
+    <button class="loc-chip" onclick="appendTooth('location','9')">9</button>
+    <button class="loc-chip" onclick="appendTooth('location','X')">X</button>
+    <button class="loc-chip loc-chip-confirm" onclick="commitLoc('location')" id="loc-confirm-location" style="display:none">加入</button>
   </div>
-  <div class="loc-result" id="location-result">尚未選擇</div>
+  <div class="loc-preview" id="location-preview"></div>
+  <div class="loc-result" id="location-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="location" value="">
 </div>
 
@@ -290,16 +296,20 @@
   </div>
   <div class="loc-divider"></div>
   <div class="loc-group">
-    <button class="loc-chip" onclick="selectTooth('nextloc','1')">1</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','2')">2</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','3')">3</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','4')">4</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','5')">5</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','6')">6</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','7')">7</button>
-    <button class="loc-chip" onclick="selectTooth('nextloc','8')">8</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','1')">1</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','2')">2</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','3')">3</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','4')">4</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','5')">5</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','6')">6</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','7')">7</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','8')">8</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','9')">9</button>
+    <button class="loc-chip" onclick="appendTooth('nextloc','X')">X</button>
+    <button class="loc-chip loc-chip-confirm" onclick="commitLoc('nextloc')" id="loc-confirm-nextloc" style="display:none">加入</button>
   </div>
-  <div class="loc-result" id="nextloc-result">尚未選擇</div>
+  <div class="loc-preview" id="nextloc-preview"></div>
+  <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
 </div>
 
@@ -376,15 +386,19 @@
       </div>
       <div class="loc-divider"></div>
       <div class="loc-group">
-        <button class="loc-chip" onclick="selectTooth('edit-location','1')">1</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','2')">2</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','3')">3</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','4')">4</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','5')">5</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','6')">6</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','7')">7</button>
-        <button class="loc-chip" onclick="selectTooth('edit-location','8')">8</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','1')">1</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','2')">2</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','3')">3</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','4')">4</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','5')">5</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','6')">6</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','7')">7</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','8')">8</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','9')">9</button>
+        <button class="loc-chip" onclick="appendTooth('edit-location','X')">X</button>
+        <button class="loc-chip loc-chip-confirm" onclick="commitLoc('edit-location')" id="loc-confirm-edit-location" style="display:none">加入</button>
       </div>
+      <div class="loc-preview" id="edit-location-preview"></div>
       <div class="loc-result" id="edit-location-result">尚未選擇</div>
       <input type="hidden" id="edit-location" value="">
     </div>
@@ -417,15 +431,19 @@
       </div>
       <div class="loc-divider"></div>
       <div class="loc-group">
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','1')">1</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','2')">2</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','3')">3</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','4')">4</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','5')">5</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','6')">6</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','7')">7</button>
-        <button class="loc-chip" onclick="selectTooth('edit-nextloc','8')">8</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','1')">1</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','2')">2</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','3')">3</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','4')">4</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','5')">5</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','6')">6</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','7')">7</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','8')">8</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','9')">9</button>
+        <button class="loc-chip" onclick="appendTooth('edit-nextloc','X')">X</button>
+        <button class="loc-chip loc-chip-confirm" onclick="commitLoc('edit-nextloc')" id="loc-confirm-edit-nextloc" style="display:none">加入</button>
       </div>
+      <div class="loc-preview" id="edit-nextloc-preview"></div>
       <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
       <input type="hidden" id="edit-nextloc" value="">
     </div>
@@ -776,10 +794,12 @@ function clearAll() {
 // ── 處置部位 chip 邏輯 ──
 const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
 const locPendingQuad = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
+const locPendingNum = { location: '', nextloc: '', 'edit-location': '', 'edit-nextloc': '' };
 const LOC_DIRECT = ['全口', '上顎', '下顎'];
 
 function toggleQuadrant(fieldId, quad, btn) {
   if (LOC_DIRECT.includes(quad)) {
+    commitLoc(fieldId);
     addLocItem(fieldId, quad);
     return;
   }
@@ -792,16 +812,41 @@ function toggleQuadrant(fieldId, quad, btn) {
     pending.splice(idx, 1);
     btn.classList.remove('pending');
   }
+  updateLocPreview(fieldId);
 }
 
-function selectTooth(fieldId, num) {
-  const pending = locPendingQuad[fieldId];
-  if (pending.length === 0) {
+function appendTooth(fieldId, ch) {
+  locPendingNum[fieldId] += ch;
+  updateLocPreview(fieldId);
+}
+
+function commitLoc(fieldId) {
+  const quads = locPendingQuad[fieldId];
+  const num = locPendingNum[fieldId];
+  if (quads.length === 0 && num === '') return;
+  if (quads.length === 0) {
     addLocItem(fieldId, num);
+  } else if (num === '') {
+    quads.forEach(q => addLocItem(fieldId, q));
   } else {
-    pending.forEach(q => addLocItem(fieldId, q + num));
-    clearPendingQuad(fieldId);
+    quads.forEach(q => addLocItem(fieldId, q + num));
   }
+  locPendingNum[fieldId] = '';
+  clearPendingQuad(fieldId);
+  updateLocPreview(fieldId);
+}
+
+function updateLocPreview(fieldId) {
+  const quads = locPendingQuad[fieldId];
+  const num = locPendingNum[fieldId];
+  const el = document.getElementById(fieldId + '-preview');
+  const btn = document.getElementById('loc-confirm-' + fieldId);
+  const hasPending = quads.length > 0 || num !== '';
+  if (btn) btn.style.display = hasPending ? 'inline-flex' : 'none';
+  if (!el) return;
+  if (!hasPending) { el.textContent = ''; return; }
+  const preview = quads.length > 0 ? quads.map(q => q + num).join('、') : num;
+  el.textContent = '▶ ' + preview;
 }
 
 function addLocItem(fieldId, value) {
@@ -829,14 +874,16 @@ function updateLocDisplay(fieldId) {
   if (!el) return;
   if (sel.length === 0) { el.innerHTML = '<span style="color:#a0aec0">尚未選擇</span>'; return; }
   el.innerHTML = sel.map(v =>
-    `<span class="loc-tag">${v}<button class="loc-tag-del" onclick="removeLocItem('${fieldId}','${v}')">×</button></span>`
+    `<span class="loc-tag">${v}<button class="loc-tag-del" onclick="removeLocItem('${fieldId}','${v}')">[刪]</button></span>`
   ).join('');
 }
 
 function clearLocChips(fieldId) {
   locSelections[fieldId] = [];
+  locPendingNum[fieldId] = '';
   clearPendingQuad(fieldId);
   updateLocDisplay(fieldId);
+  updateLocPreview(fieldId);
 }
 
 function setLocChips(fieldId, valueStr) {
