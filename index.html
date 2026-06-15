@@ -972,7 +972,7 @@ const QUICK_NOTES = [
 function appendQuickTerm(fieldId, term) {
   const ta = document.getElementById(fieldId);
   const cur = ta.value;
-  ta.value = cur ? cur + '\n' + term : term;
+  ta.value = cur ? cur + ' ' + term : term;
   autoResize(ta);
   ta.focus();
 }
