@@ -704,8 +704,6 @@ async function testConnection() {
 }
 
 async function submitData() {
-  // 在手勢當下立刻初始化並播音，await 之後 iOS 會失去音頻授權
-  getAudioCtx();
   if (!scriptUrl) {
     showConfig();
     return;
