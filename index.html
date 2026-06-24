@@ -765,7 +765,10 @@ function renderHistory() {
     <div class="history-item">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div class="h-name">👤 ${h.name}</div>
-        <button onclick="openEdit(${i})" style="background:#ebf8ff;border:1px solid #bee3f8;color:#2b6cb0;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;flex-shrink:0;margin-left:8px;">✏️ 修改</button>
+        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px;">
+          <button onclick="openEdit(${i})" style="background:#ebf8ff;border:1px solid #bee3f8;color:#2b6cb0;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">✏️ 修改</button>
+          <button onclick="deleteHistoryItem(${i})" style="background:#fff5f5;border:1px solid #fed7d7;color:#c53030;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">🗑️ 刪除</button>
+        </div>
       </div>
       ${h.location ? `<div class="h-row">📍 本次部位：${h.location}</div>` : ''}
       <div class="h-row">本次：${h.treatment}</div>
@@ -776,6 +779,14 @@ function renderHistory() {
       <div class="h-time">${h.time}</div>
     </div>
   `).join('');
+}
+
+function deleteHistoryItem(i) {
+  if (!confirm('確定要從此裝置的紀錄中刪除這筆？（不會影響 Google Sheet 已上傳的資料）')) return;
+  history.splice(i, 1);
+  localStorage.setItem('dentalHistory', JSON.stringify(history));
+  renderHistory();
+  showToast('已從本機紀錄移除', 'success');
 }
 
 function clearAll() {
