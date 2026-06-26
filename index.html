@@ -613,6 +613,7 @@ function startVoice(fieldId) {
   ta.classList.add('listening');
 
   let baseText = ta.value;
+  let gotFinalText = false;
 
   recognition.onstart = () => setStatus('🔴 收音中，說完會自動辨識...', true);
 
@@ -623,20 +624,20 @@ function startVoice(fieldId) {
       if (e.results[i].isFinal) final += t;
       else interim += t;
     }
-    if (final) baseText += final;
+    if (final) { baseText += final; gotFinalText = true; }
     ta.value = baseText + interim;
     autoResize(ta);
   };
 
   recognition.onerror = (e) => {
     const msgs = { 'no-speech': '沒偵測到聲音，請再試', 'network': '網路錯誤', 'not-allowed': '麥克風被拒絕，請在設定中允許', 'audio-capture': '找不到麥克風' };
-    if (msgs[e.error]) setStatus('⚠️ ' + msgs[e.error]);
+    setStatus('⚠️ ' + (msgs[e.error] || ('辨識失敗：' + e.error + '，請再試')));
     stopVoice();
   };
 
   recognition.onend = () => {
     stopVoice();
-    setStatus('✅ 說完，再按 🎤 繼續輸入');
+    setStatus(gotFinalText ? '✅ 說完，再按 🎤 繼續輸入' : '⚠️ 沒收到文字，請靠近麥克風再說一次');
   };
 
   recognition.start();
