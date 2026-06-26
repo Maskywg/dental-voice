@@ -274,16 +274,7 @@
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
-  <div class="field-row">
-    <textarea id="next" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
-    <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
-  </div>
   <div class="quick-chips" id="qc-next"></div>
-</div>
-
-<!-- 下次處置部位 -->
-<div class="card">
-  <div class="field-label">下次處置部位</div>
   <div class="loc-group" data-loc-quad-group="nextloc">
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左上',this)">左上</button>
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左下',this)">左下</button>
@@ -310,6 +301,11 @@
   <div class="loc-preview" id="nextloc-preview"></div>
   <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
+  <div class="loc-divider" style="margin-top:12px;"></div>
+  <div class="field-row" style="margin-top:8px;">
+    <textarea id="next" rows="3" placeholder="點上方快速詞 或 按🎤語音輸入"></textarea>
+    <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
+  </div>
 </div>
 
 <!-- 交代事項 -->
@@ -373,7 +369,8 @@
       </div>
     </div>
     <div style="margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次處置部位</div>
+      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
+      <div class="quick-chips" id="qc-edit-treatment"></div>
       <div class="loc-group" data-loc-quad-group="edit-location">
         <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','左上',this)">左上</button>
         <button class="loc-chip" data-loc-quad="edit-location" onclick="toggleQuadrant('edit-location','左下',this)">左下</button>
@@ -400,25 +397,15 @@
       <div class="loc-preview" id="edit-location-preview"></div>
       <div class="loc-result" id="edit-location-result">尚未選擇</div>
       <input type="hidden" id="edit-location" value="">
-    </div>
-    <div style="margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
-      <div class="field-row">
+      <div class="loc-divider" style="margin-top:12px;"></div>
+      <div class="field-row" style="margin-top:8px;">
         <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
         <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
       </div>
-      <div class="quick-chips" id="qc-edit-treatment"></div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
-      <div class="field-row">
-        <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
-        <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
-      </div>
       <div class="quick-chips" id="qc-edit-next"></div>
-    </div>
-    <div style="margin-bottom:12px;">
-      <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
       <div class="loc-group">
         <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','左上',this)">左上</button>
         <button class="loc-chip" data-loc-quad="edit-nextloc" onclick="toggleQuadrant('edit-nextloc','左下',this)">左下</button>
@@ -445,6 +432,11 @@
       <div class="loc-preview" id="edit-nextloc-preview"></div>
       <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
       <input type="hidden" id="edit-nextloc" value="">
+      <div class="loc-divider" style="margin-top:12px;"></div>
+      <div class="field-row" style="margin-top:8px;">
+        <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+        <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
+      </div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">交代事項</div>
