@@ -807,7 +807,6 @@ const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-ne
 const locPendingQuad = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
 const locPendingNum = { location: '', nextloc: '', 'edit-location': '', 'edit-nextloc': '' };
 const LOC_DIRECT = ['全口', '上顎', '下顎'];
-const LOC_TEXT_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
 
 function toggleQuadrant(fieldId, quad, btn) {
   if (LOC_DIRECT.includes(quad)) {
@@ -861,37 +860,16 @@ function updateLocPreview(fieldId) {
   el.textContent = '▶ ' + preview;
 }
 
-function addLocItem(fieldId, value, opts = {}) {
+function addLocItem(fieldId, value) {
   const sel = locSelections[fieldId];
-  if (!sel.includes(value)) {
-    sel.push(value);
-    if (!opts.silent) {
-      const taId = LOC_TEXT_MAP[fieldId];
-      if (taId) appendQuickTerm(taId, value);
-    }
-  }
+  if (!sel.includes(value)) sel.push(value);
   updateLocDisplay(fieldId);
 }
 
 function removeLocItem(fieldId, value) {
   const sel = locSelections[fieldId];
   const idx = sel.indexOf(value);
-  if (idx !== -1) {
-    sel.splice(idx, 1);
-    const taId = LOC_TEXT_MAP[fieldId];
-    if (taId) {
-      const ta = document.getElementById(taId);
-      if (ta) {
-        const parts = ta.value.split(' ');
-        const pi = parts.indexOf(value);
-        if (pi !== -1) {
-          parts.splice(pi, 1);
-          ta.value = parts.join(' ');
-          autoResize(ta);
-        }
-      }
-    }
-  }
+  if (idx !== -1) sel.splice(idx, 1);
   updateLocDisplay(fieldId);
 }
 
@@ -922,7 +900,7 @@ function clearLocChips(fieldId) {
 function setLocChips(fieldId, valueStr) {
   clearLocChips(fieldId);
   if (!valueStr) return;
-  valueStr.split(' ').filter(Boolean).forEach(v => addLocItem(fieldId, v, { silent: true }));
+  valueStr.split(' ').filter(Boolean).forEach(v => addLocItem(fieldId, v));
 }
 
 // ── 提示音（用 Audio 元素，iOS 相容性最佳）──
