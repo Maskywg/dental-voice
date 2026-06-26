@@ -198,6 +198,9 @@
   .loc-chip.pending { background: #ebf8ff; border-color: #63b3ed; color: #2b6cb0; font-weight: 600; }
   .loc-chip-confirm { background: #276749 !important; border-color: #276749 !important; color: white !important; font-weight: 600; }
   .loc-preview { font-size: 0.85rem; color: #2b6cb0; min-height: 18px; margin: 4px 0 2px; font-weight: 600; }
+  .item-input { min-height: 40px !important; }
+  .add-item-btn { width: 100%; padding: 8px; margin-top: 6px; background: #276749; color: white; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  .add-item-btn:active { transform: scale(0.98); }
   .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
@@ -266,20 +269,26 @@
 <div class="card">
   <div class="field-label">本次療程</div>
   <div class="field-row">
-    <textarea id="treatment" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
-    <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
+    <textarea id="treatment-input" class="item-input" rows="1" placeholder="輸入單項療程或語音輸入後按加入"></textarea>
+    <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment-input')" title="語音輸入">🎤</button>
   </div>
+  <button class="add-item-btn" onclick="commitTreatmentInput('treatment')">＋ 加入</button>
   <div class="quick-chips" id="qc-treatment"></div>
+  <div class="loc-result" id="treatment-result"><span style="color:#a0aec0">尚未加入</span></div>
+  <textarea id="treatment" style="display:none"></textarea>
 </div>
 
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
   <div class="field-row">
-    <textarea id="next" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
-    <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
+    <textarea id="next-input" class="item-input" rows="1" placeholder="輸入單項療程或語音輸入後按加入"></textarea>
+    <button class="mic-btn" id="mic-next" onclick="toggleVoice('next-input')" title="語音輸入">🎤</button>
   </div>
+  <button class="add-item-btn" onclick="commitTreatmentInput('next')">＋ 加入</button>
   <div class="quick-chips" id="qc-next"></div>
+  <div class="loc-result" id="next-result"><span style="color:#a0aec0">尚未加入</span></div>
+  <textarea id="next" style="display:none"></textarea>
 </div>
 
 <!-- 下次處置部位 -->
@@ -405,18 +414,24 @@
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
       <div class="field-row">
-        <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
-        <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
+        <textarea id="edit-treatment-input" class="item-input" rows="1" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;" placeholder="輸入單項療程或語音輸入後按加入"></textarea>
+        <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment-input')" style="margin-top:0">🎤</button>
       </div>
+      <button class="add-item-btn" onclick="commitTreatmentInput('edit-treatment')">＋ 加入</button>
       <div class="quick-chips" id="qc-edit-treatment"></div>
+      <div class="loc-result" id="edit-treatment-result"><span style="color:#a0aec0">尚未加入</span></div>
+      <textarea id="edit-treatment" style="display:none"></textarea>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
       <div class="field-row">
-        <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
-        <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
+        <textarea id="edit-next-input" class="item-input" rows="1" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;" placeholder="輸入單項療程或語音輸入後按加入"></textarea>
+        <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next-input')" style="margin-top:0">🎤</button>
       </div>
+      <button class="add-item-btn" onclick="commitTreatmentInput('edit-next')">＋ 加入</button>
       <div class="quick-chips" id="qc-edit-next"></div>
+      <div class="loc-result" id="edit-next-result"><span style="color:#a0aec0">尚未加入</span></div>
+      <textarea id="edit-next" style="display:none"></textarea>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次處置部位</div>
@@ -548,7 +563,7 @@ function init() {
   if (isIOS) {
     document.getElementById('iosBanner').style.display = 'block';
     document.getElementById('statusBar').textContent = '點欄位 → 鍵盤出現 → 按鍵盤上的 🎤';
-    ['name','treatment','next'].forEach(id => {
+    ['name','treatment-input','next-input'].forEach(id => {
       document.getElementById(id).placeholder = '點此，鍵盤出現後按 🎤 說話';
     });
   }
@@ -791,15 +806,61 @@ function deleteHistoryItem(i) {
 
 function clearAll() {
   stopVoice();
-  ['name', 'treatment', 'next', 'note'].forEach(id => {
-    const ta = document.getElementById(id);
-    ta.value = '';
-    ta.style.height = '';
-  });
+  document.getElementById('name').value = '';
+  document.getElementById('note').value = '';
+  document.getElementById('note').style.height = '';
+  clearTreatmentItems('treatment');
+  clearTreatmentItems('next');
   document.getElementById('lab').value = '';
   clearLocChips('location');
   clearLocChips('nextloc');
   setStatus('點擊 🎤 開始語音輸入');
+}
+
+// ── 療程彙整（輸入→加入→標籤）邏輯 ──
+const itemSelections = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
+
+function addTreatmentItem(fieldId, value) {
+  value = (value || '').trim();
+  if (!value) return;
+  itemSelections[fieldId].push(value);
+  updateTreatmentDisplay(fieldId);
+}
+
+function removeTreatmentItem(fieldId, idx) {
+  itemSelections[fieldId].splice(idx, 1);
+  updateTreatmentDisplay(fieldId);
+}
+
+function updateTreatmentDisplay(fieldId) {
+  const sel = itemSelections[fieldId];
+  document.getElementById(fieldId).value = sel.join(' ');
+  const el = document.getElementById(fieldId + '-result');
+  if (!el) return;
+  if (sel.length === 0) { el.innerHTML = '<span style="color:#a0aec0">尚未加入</span>'; return; }
+  el.innerHTML = sel.map((v, i) =>
+    `<span class="loc-tag">${v}<button class="loc-tag-del" onclick="removeTreatmentItem('${fieldId}',${i})">[刪]</button></span>`
+  ).join('');
+}
+
+function commitTreatmentInput(fieldId) {
+  const input = document.getElementById(fieldId + '-input');
+  if (!input) return;
+  addTreatmentItem(fieldId, input.value);
+  input.value = '';
+  input.style.height = '';
+}
+
+function setTreatmentItems(fieldId, valueStr) {
+  itemSelections[fieldId] = valueStr ? valueStr.split(' ').filter(Boolean) : [];
+  updateTreatmentDisplay(fieldId);
+}
+
+function clearTreatmentItems(fieldId) {
+  itemSelections[fieldId] = [];
+  const input = document.getElementById(fieldId + '-input');
+  if (input) { input.value = ''; input.style.height = ''; }
+  updateTreatmentDisplay(fieldId);
 }
 
 // ── 處置部位 chip 邏輯 ──
@@ -807,7 +868,6 @@ const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-ne
 const locPendingQuad = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
 const locPendingNum = { location: '', nextloc: '', 'edit-location': '', 'edit-nextloc': '' };
 const LOC_DIRECT = ['全口', '上顎', '下顎'];
-const LOC_TEXT_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
 
 function toggleQuadrant(fieldId, quad, btn) {
   if (LOC_DIRECT.includes(quad)) {
@@ -863,35 +923,14 @@ function updateLocPreview(fieldId) {
 
 function addLocItem(fieldId, value, opts = {}) {
   const sel = locSelections[fieldId];
-  if (!sel.includes(value)) {
-    sel.push(value);
-    if (!opts.silent) {
-      const taId = LOC_TEXT_MAP[fieldId];
-      if (taId) appendQuickTerm(taId, value);
-    }
-  }
+  if (!sel.includes(value)) sel.push(value);
   updateLocDisplay(fieldId);
 }
 
 function removeLocItem(fieldId, value) {
   const sel = locSelections[fieldId];
   const idx = sel.indexOf(value);
-  if (idx !== -1) {
-    sel.splice(idx, 1);
-    const taId = LOC_TEXT_MAP[fieldId];
-    if (taId) {
-      const ta = document.getElementById(taId);
-      if (ta) {
-        const parts = ta.value.split(' ');
-        const pi = parts.indexOf(value);
-        if (pi !== -1) {
-          parts.splice(pi, 1);
-          ta.value = parts.join(' ');
-          autoResize(ta);
-        }
-      }
-    }
-  }
+  if (idx !== -1) sel.splice(idx, 1);
   updateLocDisplay(fieldId);
 }
 
@@ -960,8 +999,8 @@ function openEdit(i) {
   const h = history[i];
   document.getElementById('edit-name').value = h.name || '';
   setLocChips('edit-location', h.location || '');
-  document.getElementById('edit-treatment').value = h.treatment || '';
-  document.getElementById('edit-next').value = h.next || '';
+  setTreatmentItems('edit-treatment', h.treatment || '');
+  setTreatmentItems('edit-next', h.next || '');
   setLocChips('edit-nextloc', h.nextloc || '');
   document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
@@ -1086,14 +1125,17 @@ function appendQuickTerm(fieldId, term) {
   ta.focus();
 }
 
+const TREATMENT_AGG_FIELDS = ['treatment', 'next', 'edit-treatment', 'edit-next'];
+
 function renderQuickChips(containerId, fieldId, isNote = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const list = isNote ? QUICK_NOTES : QUICK_TERMS;
+  const handler = TREATMENT_AGG_FIELDS.includes(fieldId) ? 'addTreatmentItem' : 'appendQuickTerm';
   el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
     <div class="qc-group">
-      ${g.terms.map(t => `<button class="qc-btn" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
+      ${g.terms.map(t => `<button class="qc-btn" onclick="${handler}('${fieldId}','${t}')">${t}</button>`).join('')}
     </div>
   `).join('');
 }
