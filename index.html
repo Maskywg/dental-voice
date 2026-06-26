@@ -231,6 +231,16 @@
   </div>
 </div>
 
+<!-- 本次療程 -->
+<div class="card">
+  <div class="field-label">本次療程</div>
+  <div class="field-row">
+    <textarea id="treatment" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
+    <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
+  </div>
+  <div class="quick-chips" id="qc-treatment"></div>
+</div>
+
 <!-- 本次處置部位 -->
 <div class="card">
   <div class="field-label">本次處置部位</div>
@@ -260,16 +270,6 @@
   <div class="loc-preview" id="location-preview"></div>
   <div class="loc-result" id="location-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="location" value="">
-</div>
-
-<!-- 本次療程 -->
-<div class="card">
-  <div class="field-label">本次療程</div>
-  <div class="field-row">
-    <textarea id="treatment" rows="3" placeholder="點下方快速詞 或 按🎤語音輸入"></textarea>
-    <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
-  </div>
-  <div class="quick-chips" id="qc-treatment"></div>
 </div>
 
 <!-- 下次可能療程 -->
