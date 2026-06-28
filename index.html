@@ -538,7 +538,10 @@ async function loadServerNames() {
 
 function getNamePool() {
   const fromHistory = history.map(h => h.name).filter(Boolean);
-  return [...new Set([...PATIENT_NAME_SEED, ...serverNamePool, ...fromHistory])];
+  // serverNamePool 是即時從資料夾抓的最新資料，優先使用；
+  // PATIENT_NAME_SEED 是舊的固定快照，只在 Apps Script 還沒回應時當備援，避免混入已修正過的舊姓名
+  const base = serverNamePool.length > 0 ? serverNamePool : PATIENT_NAME_SEED;
+  return [...new Set([...base, ...fromHistory])];
 }
 
 function levenshtein(a, b) {
