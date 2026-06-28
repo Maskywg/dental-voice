@@ -528,7 +528,7 @@ const NAME_BLOCKLIST = new Set(['Masky', 'kaoli', 'masky wang', 'test', '測試'
 
 async function loadServerNames() {
   try {
-    const res = await fetch(scriptUrl + '?action=getNames');
+    const res = await fetch(scriptUrl + '?action=getNames&_=' + Date.now(), { cache: 'no-store' });
     const data = await res.json();
     if (data.result === 'success' && Array.isArray(data.names)) {
       serverNamePool = data.names.filter(n => !NAME_BLOCKLIST.has(n));
