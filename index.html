@@ -229,6 +229,7 @@
   <div class="field-row">
     <textarea id="name" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-name" onclick="toggleVoice('name')" title="語音輸入">🎤</button>
+    <button class="mic-btn" style="background:#e53e3e;box-shadow:0 2px 6px rgba(229,62,62,0.4);" onclick="clearFieldWithConfirm('name')" title="清除姓名">🗑️</button>
   </div>
   <div class="quick-chips" id="name-suggest" style="margin-top:6px;"></div>
 </div>
@@ -367,6 +368,7 @@
       <div class="field-row">
         <input id="edit-name" type="text" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
         <button class="mic-btn" id="mic-edit-name" onclick="toggleVoice('edit-name')" style="margin-top:0">🎤</button>
+        <button class="mic-btn" style="margin-top:0;background:#e53e3e;box-shadow:0 2px 6px rgba(229,62,62,0.4);" onclick="clearFieldWithConfirm('edit-name')" title="清除姓名">🗑️</button>
       </div>
       <div class="quick-chips" id="edit-name-suggest" style="margin-top:6px;"></div>
     </div>
@@ -564,6 +566,16 @@ function pickSuggestedName(fieldId, name) {
   const ta = document.getElementById(fieldId);
   ta.value = name;
   document.getElementById(fieldId + '-suggest').innerHTML = '';
+  ta.focus();
+}
+
+function clearFieldWithConfirm(fieldId) {
+  if (!confirm('確定要清除這個欄位的內容嗎？')) return;
+  const ta = document.getElementById(fieldId);
+  ta.value = '';
+  if (ta.style) ta.style.height = '';
+  const suggestEl = document.getElementById(fieldId + '-suggest');
+  if (suggestEl) suggestEl.innerHTML = '';
   ta.focus();
 }
 
