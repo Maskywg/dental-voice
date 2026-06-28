@@ -230,6 +230,7 @@
     <textarea id="name" rows="1" placeholder="點此欄位，再按鍵盤🎤說話"></textarea>
     <button class="mic-btn" id="mic-name" onclick="toggleVoice('name')" title="語音輸入">🎤</button>
   </div>
+  <div class="quick-chips" id="name-suggest" style="margin-top:6px;"></div>
 </div>
 
 <!-- 本次療程 -->
@@ -367,6 +368,7 @@
         <input id="edit-name" type="text" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;">
         <button class="mic-btn" id="mic-edit-name" onclick="toggleVoice('edit-name')" style="margin-top:0">🎤</button>
       </div>
+      <div class="quick-chips" id="edit-name-suggest" style="margin-top:6px;"></div>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">本次療程</div>
@@ -515,6 +517,56 @@ let scriptUrl = DEFAULT_SCRIPT_URL;
 localStorage.setItem('dentalScriptUrl', DEFAULT_SCRIPT_URL);
 let history = JSON.parse(localStorage.getItem('dentalHistory') || '[]');
 
+// ── 歷史患者姓名清單（語音/打字辨識比對建議用）──
+const PATIENT_NAME_SEED = ["于蔡玉鶴","何倚威","何元魁","何文馨","何明憲","余天受","余天授","余幸蓉","余懷安","余王明杏","倪韶永","劉奕威","劉強生","劉志芳","劉昭燕","劉曉琪","劉淑美","原志永","史艾克","吳佳玲","吳啟立","吳嘉祥","吳孟珠","吳怡靜","吳明田","吳東男","吳桂珍","吳桂禎","吳淑女","吳玉芬","吳睿騰","吳簡清連","吳簡青蓮","吳雲菲","周文隆","周東琴","周翊華","周蓮青","周連青","周麟昇","唐志春","唐英哲","大原二郎","姚叔安","婁荷花","宋成瑜","宣寶莉","尹運修","巫逸慈","康永勛","廖華白","張世孟","張俊瑞","張凱","張則鈞","張宜玲","張峻睿","張忠霖","張時","張杉","張榕棻","張淑惠","張玉如","張祐糸","張秀涵","張素燕","張育儒","張育凡","張舜傑","張蓉棻","張衫","張豐","張豐凱","張鐘霖","彭建成","彭豔飛","徐時強","徐水支","徐淳昊","方許麗香","施睿欣","施睿貞","易彩雲","曾國補","曾子玲","曾德水","曾心會","曾文宏","曾記維","朱寶蓮","李彥秋","李彩螢","李文祥","李明珠","李玉勻","李陳宜","李雅惠","李鳳珠","林佩瑩","林勤倉","林大偉","林姿秀","林婷玉","林思臣","林恩如","林意容","林敏和","林昀希","林春好","林月鳳","林瑞展","林益全","林秀芬","林秀英","林維華","林美利","林美子","林美珍","林美麗","林蔭","林音儒","林麗娟","林麗珠","林麗琴","林龍珠","梁季葳","楊元碩","楊喬瑜","楊惠琪","楊承威","楊明月","楊智欽","楊曉蓉","楊月霞","楊東謀","楊正豐","楊淑琪","江志忠","江文章","洪建成","洪張阿軸","洪秋海","涂秀美","游連桂","湯守榮","溫秋遠","潮月領","王世福","王仁溪","王仙桂","王佳文","王兆実","王凱弘","王威揚","王易飛","王朝佑","王毅輝","王玲玲","王盛郎","王瞳雲","王立群","王美琇","王美秀","王肇陽","王臣萍","王雅惠","盧正倫","盧黃玉倫","石雅馨","簡嘉妤","簡實繡花","簡淑芬","粘紹勇","紀冠如","羅純敏","翁志成","莊瑜玲","葉斯貴","蔡ㄧ萍","蔡承翰","蔡文毅","蔡文義","蔡樹枝","蔡水寶","蔡美惠","蔡耀煌","蔡詠欣","蔡雨珊","蘇婉玲","蘇小雲","蘇湘琴","蘇郁勻","許元玲","許博正","許嘉琦","許建合","許建泰","許林碧珠","許瑞傑","許金菊","詹含笑","詹庚佑","詹鳳霞","謝文豪","謝智凱","賴孟宜","賴敏惠","賴錦勝","賴靖國","趙子民","趙美理","趙美裡","週良展","邱其修","邱家駿","邱美香","邱詩音","邱雨倫","郭素蓮","郭維國","都永成","鄒偉柏","鄒瑋伯","鄭宇珊","鄭恩儀","鄭秉峰","鄭美麗","鄭英真","鄭螢筑","鄭馮景玲","鄭馮錦玲","鐘建滿","鐘源忠","鐘間滿","陳世斌","陳佩儀","陳佩怡","陳其平","陳勝智","陳奇叡","陳奇敬","陳奕安","陳孟竹","陳宏義","陳寶猜","陳彥奇","陳志瑋","陳怡仁","陳怡如","陳惠容","陳惠蘭","陳慧蓉","陳慧龍","陳文漢","陳新陽","陳昀臻","陳林瓊碧","陳桂花","陳正國","陳正龍","陳瑜芳","陳秋涼","陳秋芬","陳翠玲","陳金鳳","陳雲平","陳雲玉","陳頌光","陳鳳梅","雅玉","韓丹","韓文孟","餘佑安","饒鐵樹","馬世方","馮宜嫻","高宗妙","高明仁","高碧琴","高聖傑","高靖琦","魏愛勻","魏顯傑","鶴圓圓","黃冠嘉","黃協成","黃宣禎","黃張蘭嬌","黃思微","黃捷家","黃敏燕","黃文燦","黃明吉","黃春淦","黃昭南教","黃書筠","黃玉婷","黃玲家","黃理信之","黃秀玲","黃秋英","黃紹恩","黃美春","黃耀霆","黃育賢","黃雅珍","黃麗葉","黎于萍","黎玲君"];
+
+function getNamePool() {
+  const fromHistory = history.map(h => h.name).filter(Boolean);
+  return [...new Set([...PATIENT_NAME_SEED, ...fromHistory])];
+}
+
+function levenshtein(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function suggestNames(query) {
+  query = (query || '').trim();
+  if (!query) return [];
+  const pool = getNamePool();
+  if (pool.includes(query)) return [];
+  const scored = pool
+    .map(n => ({ name: n, dist: levenshtein(query, n) }))
+    .filter(s => s.dist > 0 && s.dist <= Math.max(1, Math.ceil(Math.max(query.length, s.name.length) / 2)))
+    .sort((a, b) => a.dist - b.dist);
+  return scored.slice(0, 5).map(s => s.name);
+}
+
+function updateNameSuggestions(fieldId) {
+  const el = document.getElementById(fieldId + '-suggest');
+  if (!el) return;
+  const query = document.getElementById(fieldId).value;
+  const matches = suggestNames(query);
+  if (matches.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="qc-divider" style="margin:0 0 2px;">是不是要找</div>' +
+    matches.map(n => `<button class="qc-btn" onclick="pickSuggestedName('${fieldId}','${n}')">${n}</button>`).join('');
+}
+
+function pickSuggestedName(fieldId, name) {
+  const ta = document.getElementById(fieldId);
+  ta.value = name;
+  document.getElementById(fieldId + '-suggest').innerHTML = '';
+  ta.focus();
+}
+
 async function loadSharedHistory() {
   const btn = document.getElementById('refreshBtn');
   if (btn) { btn.textContent = '⏳ 載入中...'; btn.disabled = true; }
@@ -552,6 +604,8 @@ function init() {
   renderQuickChips('qc-edit-next', 'edit-next');
   renderQuickChips('qc-note', 'note', true);
   renderQuickChips('qc-edit-note', 'edit-note', true);
+  document.getElementById('name').addEventListener('input', () => updateNameSuggestions('name'));
+  document.getElementById('edit-name').addEventListener('input', () => updateNameSuggestions('edit-name'));
 }
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -629,6 +683,7 @@ function startVoice(fieldId) {
   recognition.onend = () => {
     stopVoice();
     setStatus(gotFinalText ? '✅ 說完，再按 🎤 繼續輸入' : '⚠️ 沒收到文字，請靠近麥克風再說一次');
+    if (gotFinalText && (fieldId === 'name' || fieldId === 'edit-name')) updateNameSuggestions(fieldId);
   };
 
   recognition.start();
@@ -789,6 +844,7 @@ function clearAll() {
     ta.style.height = '';
   });
   document.getElementById('lab').value = '';
+  document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
   setStatus('點擊 🎤 開始語音輸入');
@@ -929,6 +985,7 @@ function openEdit(i) {
   editIndex = i;
   const h = history[i];
   document.getElementById('edit-name').value = h.name || '';
+  document.getElementById('edit-name-suggest').innerHTML = '';
   setLocChips('edit-location', h.location || '');
   document.getElementById('edit-treatment').value = h.treatment || '';
   document.getElementById('edit-next').value = h.next || '';
