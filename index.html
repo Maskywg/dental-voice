@@ -231,6 +231,7 @@
     <button class="mic-btn" id="mic-name" onclick="toggleVoice('name')" title="語音輸入">🎤</button>
     <button class="mic-btn" style="background:#e53e3e;box-shadow:0 2px 6px rgba(229,62,62,0.4);" onclick="clearFieldWithConfirm('name')" title="清除姓名">🗑️</button>
   </div>
+  <button id="refreshNamesBtn" style="width:100%;padding:8px;margin-top:6px;background:#2b6cb0;color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;" onclick="manualRefreshNames()">🔄 立即更新姓名比對清單</button>
   <div class="quick-chips" id="name-suggest" style="margin-top:6px;"></div>
 </div>
 
@@ -534,6 +535,21 @@ async function loadServerNames() {
       serverNamePool = data.names.filter(n => !NAME_BLOCKLIST.has(n));
     }
   } catch (e) {}
+}
+
+async function manualRefreshNames() {
+  const btn = document.getElementById('refreshNamesBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 更新中...';
+  try {
+    await fetch(scriptUrl + '?action=forceRefreshNames&_=' + Date.now(), { cache: 'no-store' });
+    await loadServerNames();
+    showToast('✅ 姓名清單已更新（' + serverNamePool.length + ' 筆）', 'success');
+  } catch (e) {
+    showToast('❌ 更新失敗：' + e.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '🔄 立即更新姓名比對清單';
 }
 
 function getNamePool() {
