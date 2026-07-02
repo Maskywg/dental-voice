@@ -205,6 +205,8 @@
   .qc-divider { width: 100%; font-size: 0.95rem; color: #2c5282; font-weight: 700; letter-spacing: 0.03em; margin: 8px 0 4px; }
   .qc-btn { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #bee3f8; background: #ebf8ff; font-size: 0.82rem; color: #2b6cb0; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
   .qc-btn:active { background: #2b6cb0; color: white; transform: scale(0.95); }
+  .qc-btn-next { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #9ae6b4; background: #f0fff4; font-size: 0.82rem; color: #276749; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .qc-btn-next:active { background: #276749; color: white; transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -430,6 +432,7 @@
         <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
       </div>
     </div>
+    <div class="section-divider"></div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
       <div class="quick-chips" id="qc-edit-next"></div>
@@ -1194,10 +1197,11 @@ function renderQuickChips(containerId, fieldId, isNote = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const list = isNote ? QUICK_NOTES : QUICK_TERMS;
+  const isNext = fieldId === 'next' || fieldId === 'edit-next';
   el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
     <div class="qc-group">
-      ${g.terms.map(t => `<button class="qc-btn" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
+      ${g.terms.map(t => `<button class="${isNext ? 'qc-btn-next' : 'qc-btn'}" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
     </div>
   `).join('');
 }
