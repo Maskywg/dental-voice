@@ -207,6 +207,8 @@
   .qc-btn:active { background: #2b6cb0; color: white; transform: scale(0.95); }
   .qc-btn-next { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #9ae6b4; background: #f0fff4; font-size: 0.82rem; color: #276749; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
   .qc-btn-next:active { background: #276749; color: white; transform: scale(0.95); }
+  .qc-btn-note { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #c8a97e; background: #fdf6ee; font-size: 0.82rem; color: #7b4f1e; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .qc-btn-note:active { background: #7b4f1e; color: white; transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -1198,10 +1200,11 @@ function renderQuickChips(containerId, fieldId, isNote = false) {
   if (!el) return;
   const list = isNote ? QUICK_NOTES : QUICK_TERMS;
   const isNext = fieldId === 'next' || fieldId === 'edit-next';
+  const btnClass = isNote ? 'qc-btn-note' : (isNext ? 'qc-btn-next' : 'qc-btn');
   el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
     <div class="qc-group">
-      ${g.terms.map(t => `<button class="${isNext ? 'qc-btn-next' : 'qc-btn'}" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
+      ${g.terms.map(t => `<button class="${btnClass}" onclick="appendQuickTerm('${fieldId}','${t}')">${t}</button>`).join('')}
     </div>
   `).join('');
 }
