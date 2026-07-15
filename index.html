@@ -625,7 +625,7 @@ function suggestNames(query) {
     .map(n => ({ name: n, dist: levenshtein(query, n) }))
     .filter(s => s.dist > 0 && s.dist <= Math.max(1, Math.ceil(Math.max(query.length, s.name.length) / 2)))
     .sort((a, b) => a.dist - b.dist);
-  return scored.slice(0, 5).map(s => s.name);
+  return scored.slice(0, 10).map(s => s.name);
 }
 
 function updateNameSuggestions(fieldId) {
