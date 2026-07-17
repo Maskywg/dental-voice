@@ -201,6 +201,13 @@
   .loc-preview { font-size: 0.85rem; color: #2b6cb0; min-height: 18px; margin: 4px 0 2px; font-weight: 600; }
   .loc-divider { width: 100%; height: 1px; background: #e2e8f0; margin: 4px 0; }
   .section-divider { height: 6px; background: #e53e3e; border-radius: 3px; margin: 18px 0; opacity: 0.85; }
+  .term-staging { display:none; background:#f0fff4; border:1.5px solid #9ae6b4; border-radius:10px; padding:8px 10px; margin-bottom:8px; }
+  .term-staging-pills { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .term-staging-pill { background:#fff; border:1px solid #9ae6b4; border-radius:14px; padding:3px 10px; font-size:0.83rem; color:#276749; display:flex; align-items:center; gap:5px; }
+  .term-staging-pill button { background:none; border:none; color:#9ae6b4; cursor:pointer; font-size:0.8rem; padding:0; line-height:1; }
+  .term-staging-actions { display:flex; gap:8px; }
+  .term-staging-confirm { background:#276749; color:#fff; border:none; border-radius:8px; padding:6px 16px; font-size:0.85rem; font-family:inherit; cursor:pointer; font-weight:600; }
+  .term-staging-clear { background:#fff; color:#718096; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; font-size:0.85rem; font-family:inherit; cursor:pointer; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed #cbd5e0; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
   .qc-divider { width: 100%; font-size: 0.95rem; color: #2c5282; font-weight: 700; letter-spacing: 0.03em; margin: 8px 0 4px; }
@@ -278,6 +285,13 @@
   <div class="loc-preview" id="location-preview"></div>
   <div class="loc-result" id="location-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="location" value="">
+  <div class="term-staging" id="staging-treatment">
+    <div class="term-staging-pills" id="staging-treatment-pills"></div>
+    <div class="term-staging-actions">
+      <button class="term-staging-confirm" onclick="commitPendingTerms('treatment')">✓ 加入彙整</button>
+      <button class="term-staging-clear" onclick="clearPendingTerms('treatment')">✕ 清除</button>
+    </div>
+  </div>
   <div class="loc-divider" style="margin-top:12px;"></div>
   <div class="field-row" style="margin-top:8px;">
     <textarea id="treatment" rows="3" placeholder="點上方快速詞 或 按🎤語音輸入"></textarea>
@@ -324,6 +338,13 @@
   <div class="loc-preview" id="nextloc-preview"></div>
   <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
+  <div class="term-staging" id="staging-next">
+    <div class="term-staging-pills" id="staging-next-pills"></div>
+    <div class="term-staging-actions">
+      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
+      <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
+    </div>
+  </div>
   <div class="loc-divider" style="margin-top:12px;"></div>
   <div class="field-row" style="margin-top:8px;">
     <textarea id="next" rows="3" placeholder="點上方快速詞 或 按🎤語音輸入"></textarea>
@@ -435,6 +456,13 @@
       <div class="loc-preview" id="edit-location-preview"></div>
       <div class="loc-result" id="edit-location-result">尚未選擇</div>
       <input type="hidden" id="edit-location" value="">
+      <div class="term-staging" id="staging-edit-treatment">
+        <div class="term-staging-pills" id="staging-edit-treatment-pills"></div>
+        <div class="term-staging-actions">
+          <button class="term-staging-confirm" onclick="commitPendingTerms('edit-treatment')">✓ 加入彙整</button>
+          <button class="term-staging-clear" onclick="clearPendingTerms('edit-treatment')">✕ 清除</button>
+        </div>
+      </div>
       <div class="loc-divider" style="margin-top:12px;"></div>
       <div class="field-row" style="margin-top:8px;">
         <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
@@ -478,6 +506,13 @@
       <div class="loc-preview" id="edit-nextloc-preview"></div>
       <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
       <input type="hidden" id="edit-nextloc" value="">
+      <div class="term-staging" id="staging-edit-next">
+        <div class="term-staging-pills" id="staging-edit-next-pills"></div>
+        <div class="term-staging-actions">
+          <button class="term-staging-confirm" onclick="commitPendingTerms('edit-next')">✓ 加入彙整</button>
+          <button class="term-staging-clear" onclick="clearPendingTerms('edit-next')">✕ 清除</button>
+        </div>
+      </div>
       <div class="loc-divider" style="margin-top:12px;"></div>
       <div class="field-row" style="margin-top:8px;">
         <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
@@ -1196,12 +1231,58 @@ const QUICK_NOTES = [
   { group: '約診', terms: ['暫不約', '要趕', '回去考慮再打來約', '照原約'] },
 ];
 
+const STAGING_FIELDS = new Set(['treatment', 'next', 'edit-treatment', 'edit-next']);
+const pendingTerms = {};
+
 function appendQuickTerm(fieldId, term) {
+  if (STAGING_FIELDS.has(fieldId)) {
+    if (!pendingTerms[fieldId]) pendingTerms[fieldId] = [];
+    pendingTerms[fieldId].push(term);
+    renderStagingArea(fieldId);
+  } else {
+    const ta = document.getElementById(fieldId);
+    const cur = ta.value;
+    ta.value = cur ? cur + ' ' + term : term;
+    autoResize(ta);
+    ta.focus();
+  }
+}
+
+function renderStagingArea(fieldId) {
+  const stagingId = 'staging-' + fieldId;
+  const pillsId = 'staging-' + fieldId + '-pills';
+  const staging = document.getElementById(stagingId);
+  const pillsEl = document.getElementById(pillsId);
+  if (!staging || !pillsEl) return;
+  const terms = pendingTerms[fieldId] || [];
+  staging.style.display = terms.length ? 'block' : 'none';
+  pillsEl.innerHTML = terms.map((t, i) => `
+    <span class="term-staging-pill">${t}
+      <button onclick="removePendingTerm('${fieldId}',${i})">✕</button>
+    </span>`).join('');
+}
+
+function removePendingTerm(fieldId, idx) {
+  if (pendingTerms[fieldId]) {
+    pendingTerms[fieldId].splice(idx, 1);
+    renderStagingArea(fieldId);
+  }
+}
+
+function commitPendingTerms(fieldId) {
+  const terms = pendingTerms[fieldId];
+  if (!terms || !terms.length) return;
   const ta = document.getElementById(fieldId);
-  const cur = ta.value;
-  ta.value = cur ? cur + ' ' + term : term;
+  const cur = ta.value.trim();
+  ta.value = cur ? cur + ' ' + terms.join(' ') : terms.join(' ');
   autoResize(ta);
-  ta.focus();
+  pendingTerms[fieldId] = [];
+  renderStagingArea(fieldId);
+}
+
+function clearPendingTerms(fieldId) {
+  pendingTerms[fieldId] = [];
+  renderStagingArea(fieldId);
 }
 
 function renderQuickChips(containerId, fieldId, isNote = false) {
