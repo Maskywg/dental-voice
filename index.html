@@ -209,6 +209,11 @@
   .term-staging-confirm { background:#276749; color:#fff; border:none; border-radius:8px; padding:6px 16px; font-size:0.85rem; font-family:inherit; cursor:pointer; font-weight:600; }
   .term-staging-clear { background:#fff; color:#718096; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; font-size:0.85rem; font-family:inherit; cursor:pointer; }
   .term-staging-loc { background:#ebf8ff !important; border-color:#bee3f8 !important; color:#2b6cb0 !important; }
+  .treatment-display { display:flex; flex-direction:column; gap:5px; margin-bottom:6px; min-height:0; }
+  .treatment-item { display:flex; align-items:center; gap:6px; background:#f7fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:6px 10px; font-size:0.85rem; }
+  .treatment-item-text { flex:1; color:#2d3748; word-break:break-all; }
+  .treatment-item-edit { background:#ebf4ff; border:none; border-radius:6px; color:#2b6cb0; cursor:pointer; font-size:0.75rem; padding:2px 7px; }
+  .treatment-item-del { background:#fff5f5; border:none; border-radius:6px; color:#c53030; cursor:pointer; font-size:0.75rem; padding:2px 7px; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed #cbd5e0; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
   .qc-divider { width: 100%; font-size: 0.95rem; color: #2c5282; font-weight: 700; letter-spacing: 0.03em; margin: 8px 0 4px; }
@@ -294,8 +299,9 @@
   <div class="loc-result" id="location-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="location" value="">
   <div class="loc-divider" style="margin-top:12px;"></div>
-  <div class="field-row" style="margin-top:8px;">
-    <textarea id="treatment" rows="3" placeholder="點上方快速詞 或 按🎤語音輸入"></textarea>
+  <div class="treatment-display" id="treatment-display"></div>
+  <div class="field-row" style="margin-top:6px;">
+    <textarea id="treatment" rows="2" placeholder="語音補充輸入"></textarea>
     <button class="mic-btn" id="mic-treatment" onclick="toggleVoice('treatment')" title="語音輸入">🎤</button>
   </div>
 </div>
@@ -347,8 +353,9 @@
   <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
   <div class="loc-divider" style="margin-top:12px;"></div>
-  <div class="field-row" style="margin-top:8px;">
-    <textarea id="next" rows="3" placeholder="點上方快速詞 或 按🎤語音輸入"></textarea>
+  <div class="treatment-display" id="next-display"></div>
+  <div class="field-row" style="margin-top:6px;">
+    <textarea id="next" rows="2" placeholder="語音補充輸入"></textarea>
     <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
   </div>
 </div>
@@ -465,8 +472,9 @@
       <div class="loc-result" id="edit-location-result">尚未選擇</div>
       <input type="hidden" id="edit-location" value="">
       <div class="loc-divider" style="margin-top:12px;"></div>
-      <div class="field-row" style="margin-top:8px;">
-        <textarea id="edit-treatment" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="treatment-display" id="edit-treatment-display"></div>
+      <div class="field-row" style="margin-top:6px;">
+        <textarea id="edit-treatment" rows="2" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;" placeholder="語音補充輸入"></textarea>
         <button class="mic-btn" id="mic-edit-treatment" onclick="toggleVoice('edit-treatment')" style="margin-top:0">🎤</button>
       </div>
     </div>
@@ -515,8 +523,9 @@
       <div class="loc-result" id="edit-nextloc-result">尚未選擇</div>
       <input type="hidden" id="edit-nextloc" value="">
       <div class="loc-divider" style="margin-top:12px;"></div>
-      <div class="field-row" style="margin-top:8px;">
-        <textarea id="edit-next" rows="3" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;"></textarea>
+      <div class="treatment-display" id="edit-next-display"></div>
+      <div class="field-row" style="margin-top:6px;">
+        <textarea id="edit-next" rows="2" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;" placeholder="語音補充輸入"></textarea>
         <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
       </div>
     </div>
@@ -897,8 +906,8 @@ async function submitData() {
   }
   const name = document.getElementById('name').value.trim();
   const location = document.getElementById('location').value.trim();
-  const treatment = document.getElementById('treatment').value.trim();
-  const next = document.getElementById('next').value.trim();
+  const treatment = [...(treatmentItems['treatment'] || []), document.getElementById('treatment').value.trim()].filter(Boolean).join(' ');
+  const next = [...(treatmentItems['next'] || []), document.getElementById('next').value.trim()].filter(Boolean).join(' ');
   const nextloc = document.getElementById('nextloc').value.trim();
   const note = document.getElementById('note').value.trim();
   const lab = document.getElementById('lab').value;
@@ -974,7 +983,12 @@ function clearAll() {
   document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
-  ['treatment', 'next'].forEach(f => { pendingTerms[f] = []; renderStagingArea(f); });
+  ['treatment', 'next'].forEach(f => {
+    pendingTerms[f] = [];
+    treatmentItems[f] = [];
+    renderStagingArea(f);
+    updateTreatmentDisplay(f);
+  });
   setStatus('點擊 🎤 開始語音輸入');
 }
 
@@ -1121,8 +1135,13 @@ function openEdit(i) {
   setLocChips('edit-nextloc', h.nextloc || '');
   document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
-  // 清除修改區的暫存
-  ['edit-treatment', 'edit-next'].forEach(f => { pendingTerms[f] = []; renderStagingArea(f); });
+  // 清除修改區的暫存與彙整 display
+  ['edit-treatment', 'edit-next'].forEach(f => {
+    pendingTerms[f] = [];
+    treatmentItems[f] = [];
+    renderStagingArea(f);
+    updateTreatmentDisplay(f);
+  });
   const modal = document.getElementById('editModal');
   modal.style.display = 'flex';
 }
@@ -1138,8 +1157,8 @@ async function saveEdit() {
   const h = history[editIndex];
   const name = document.getElementById('edit-name').value.trim();
   const location = document.getElementById('edit-location').value;
-  const treatment = document.getElementById('edit-treatment').value.trim();
-  const next = document.getElementById('edit-next').value.trim();
+  const treatment = [...(treatmentItems['edit-treatment'] || []), document.getElementById('edit-treatment').value.trim()].filter(Boolean).join(' ');
+  const next = [...(treatmentItems['edit-next'] || []), document.getElementById('edit-next').value.trim()].filter(Boolean).join(' ');
   const nextloc = document.getElementById('edit-nextloc').value;
   const note = document.getElementById('edit-note').value.trim();
   const lab = document.getElementById('edit-lab').value;
@@ -1277,6 +1296,7 @@ function removePendingTerm(fieldId, idx) {
 
 const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
 const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
+const treatmentItems = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
 
 function _getLocPreviewText(locField) {
   const quads = locPendingQuad[locField] || [];
@@ -1293,22 +1313,17 @@ function commitPendingTerms(fieldId) {
   const locText = locField ? _getLocPreviewText(locField) : '';
   if (!terms.length && !locText) return;
 
-  // 部位 + 療程組合寫入彙整 textarea
   const parts = [];
   if (locText) parts.push(locText);
   parts.push(...terms);
   const combined = parts.join(' ');
-  const ta = document.getElementById(fieldId);
-  if (ta && combined) {
-    const cur = ta.value.trim();
-    ta.value = cur ? cur + ' ' + combined : combined;
-    autoResize(ta);
+
+  if (combined) {
+    treatmentItems[fieldId].push(combined);
+    updateTreatmentDisplay(fieldId);
   }
 
-  // commit 部位到 loc-result 和 hidden input
   if (locField) commitLoc(locField);
-
-  // 清除療程暫存
   pendingTerms[fieldId] = [];
   renderStagingArea(fieldId);
 }
@@ -1321,6 +1336,33 @@ function clearPendingTerms(fieldId) {
     clearPendingQuad(locField);
   }
   renderStagingArea(fieldId);
+}
+
+function updateTreatmentDisplay(fieldId) {
+  const el = document.getElementById(fieldId + '-display');
+  if (!el) return;
+  const items = treatmentItems[fieldId] || [];
+  if (!items.length) { el.innerHTML = ''; return; }
+  el.innerHTML = items.map((item, i) => `
+    <div class="treatment-item">
+      <span class="treatment-item-text">${item}</span>
+      <button class="treatment-item-edit" onclick="editTreatmentItem('${fieldId}',${i})">修改</button>
+      <button class="treatment-item-del" onclick="deleteTreatmentItem('${fieldId}',${i})">刪除</button>
+    </div>`).join('');
+}
+
+function deleteTreatmentItem(fieldId, idx) {
+  treatmentItems[fieldId].splice(idx, 1);
+  updateTreatmentDisplay(fieldId);
+}
+
+function editTreatmentItem(fieldId, idx) {
+  const cur = treatmentItems[fieldId][idx];
+  const val = prompt('修改內容：', cur);
+  if (val !== null && val.trim()) {
+    treatmentItems[fieldId][idx] = val.trim();
+    updateTreatmentDisplay(fieldId);
+  }
 }
 
 function renderQuickChips(containerId, fieldId, isNote = false) {
