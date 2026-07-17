@@ -208,6 +208,7 @@
   .term-staging-actions { display:flex; gap:8px; }
   .term-staging-confirm { background:#276749; color:#fff; border:none; border-radius:8px; padding:6px 16px; font-size:0.85rem; font-family:inherit; cursor:pointer; font-weight:600; }
   .term-staging-clear { background:#fff; color:#718096; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; font-size:0.85rem; font-family:inherit; cursor:pointer; }
+  .term-staging-loc { background:#ebf8ff !important; border-color:#bee3f8 !important; color:#2b6cb0 !important; }
   .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px dashed #cbd5e0; }
   .quick-chips .qc-group { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
   .qc-divider { width: 100%; font-size: 0.95rem; color: #2c5282; font-weight: 700; letter-spacing: 0.03em; margin: 8px 0 4px; }
@@ -973,6 +974,7 @@ function clearAll() {
   document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
+  ['treatment', 'next'].forEach(f => { pendingTerms[f] = []; renderStagingArea(f); });
   setStatus('點擊 🎤 開始語音輸入');
 }
 
@@ -984,8 +986,11 @@ const LOC_DIRECT = ['全口', '上顎', '下顎'];
 
 function toggleQuadrant(fieldId, quad, btn) {
   if (LOC_DIRECT.includes(quad)) {
-    commitLoc(fieldId);
-    addLocItem(fieldId, quad);
+    // 全口/上顎/下顎：直接設為 pending，不需要齒位數字
+    locPendingQuad[fieldId] = [quad];
+    locPendingNum[fieldId] = '';
+    document.querySelectorAll(`[data-loc-quad="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
+    updateLocPreview(fieldId);
     return;
   }
   const pending = locPendingQuad[fieldId];
@@ -1022,16 +1027,14 @@ function commitLoc(fieldId) {
 }
 
 function updateLocPreview(fieldId) {
-  const quads = locPendingQuad[fieldId];
-  const num = locPendingNum[fieldId];
+  // 隱藏舊的 loc-preview 和 loc-confirm 按鈕（統一由暫存列處理）
   const el = document.getElementById(fieldId + '-preview');
+  if (el) el.textContent = '';
   const btn = document.getElementById('loc-confirm-' + fieldId);
-  const hasPending = quads.length > 0 || num !== '';
-  if (btn) btn.style.display = hasPending ? 'inline-flex' : 'none';
-  if (!el) return;
-  if (!hasPending) { el.textContent = ''; return; }
-  const preview = quads.length > 0 ? quads.map(q => q + num).join('、') : num;
-  el.textContent = '▶ ' + preview;
+  if (btn) btn.style.display = 'none';
+  // 更新對應的暫存列
+  const stagingField = LOC_STAGING_MAP[fieldId];
+  if (stagingField) renderStagingArea(stagingField);
 }
 
 function addLocItem(fieldId, value) {
@@ -1118,6 +1121,8 @@ function openEdit(i) {
   setLocChips('edit-nextloc', h.nextloc || '');
   document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
+  // 清除修改區的暫存
+  ['edit-treatment', 'edit-next'].forEach(f => { pendingTerms[f] = []; renderStagingArea(f); });
   const modal = document.getElementById('editModal');
   modal.style.display = 'flex';
 }
@@ -1249,17 +1254,18 @@ function appendQuickTerm(fieldId, term) {
 }
 
 function renderStagingArea(fieldId) {
-  const stagingId = 'staging-' + fieldId;
-  const pillsId = 'staging-' + fieldId + '-pills';
-  const staging = document.getElementById(stagingId);
-  const pillsEl = document.getElementById(pillsId);
+  const staging = document.getElementById('staging-' + fieldId);
+  const pillsEl = document.getElementById('staging-' + fieldId + '-pills');
   if (!staging || !pillsEl) return;
   const terms = pendingTerms[fieldId] || [];
-  staging.style.display = terms.length ? 'block' : 'none';
-  pillsEl.innerHTML = terms.map((t, i) => `
-    <span class="term-staging-pill">${t}
-      <button onclick="removePendingTerm('${fieldId}',${i})">✕</button>
-    </span>`).join('');
+  const locField = STAGING_LOC_MAP[fieldId];
+  const locText = locField ? _getLocPreviewText(locField) : '';
+  const hasContent = terms.length > 0 || locText;
+  staging.style.display = hasContent ? 'block' : 'none';
+  let html = '';
+  if (locText) html += `<span class="term-staging-pill term-staging-loc">📍 ${locText}</span>`;
+  html += terms.map((t, i) => `<span class="term-staging-pill">${t}<button onclick="removePendingTerm('${fieldId}',${i})">✕</button></span>`).join('');
+  pillsEl.innerHTML = html;
 }
 
 function removePendingTerm(fieldId, idx) {
@@ -1270,23 +1276,50 @@ function removePendingTerm(fieldId, idx) {
 }
 
 const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
+
+function _getLocPreviewText(locField) {
+  const quads = locPendingQuad[locField] || [];
+  const num = locPendingNum[locField] || '';
+  if (!quads.length && !num) return '';
+  if (!quads.length) return num;
+  if (!num) return quads.join(' ');
+  return quads.map(q => q + num).join(' ');
+}
 
 function commitPendingTerms(fieldId) {
-  const terms = pendingTerms[fieldId];
-  if (!terms || !terms.length) return;
+  const terms = pendingTerms[fieldId] || [];
+  const locField = STAGING_LOC_MAP[fieldId];
+  const locText = locField ? _getLocPreviewText(locField) : '';
+  if (!terms.length && !locText) return;
+
+  // 部位 + 療程組合寫入彙整 textarea
+  const parts = [];
+  if (locText) parts.push(locText);
+  parts.push(...terms);
+  const combined = parts.join(' ');
   const ta = document.getElementById(fieldId);
-  const cur = ta.value.trim();
-  ta.value = cur ? cur + ' ' + terms.join(' ') : terms.join(' ');
-  autoResize(ta);
+  if (ta && combined) {
+    const cur = ta.value.trim();
+    ta.value = cur ? cur + ' ' + combined : combined;
+    autoResize(ta);
+  }
+
+  // commit 部位到 loc-result 和 hidden input
+  if (locField) commitLoc(locField);
+
+  // 清除療程暫存
   pendingTerms[fieldId] = [];
   renderStagingArea(fieldId);
-  // 同時 commit 對應的部位選擇
-  const locField = STAGING_LOC_MAP[fieldId];
-  if (locField) commitLoc(locField);
 }
 
 function clearPendingTerms(fieldId) {
   pendingTerms[fieldId] = [];
+  const locField = STAGING_LOC_MAP[fieldId];
+  if (locField) {
+    locPendingNum[locField] = '';
+    clearPendingQuad(locField);
+  }
   renderStagingArea(fieldId);
 }
 
