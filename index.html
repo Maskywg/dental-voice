@@ -1269,6 +1269,8 @@ function removePendingTerm(fieldId, idx) {
   }
 }
 
+const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+
 function commitPendingTerms(fieldId) {
   const terms = pendingTerms[fieldId];
   if (!terms || !terms.length) return;
@@ -1278,6 +1280,9 @@ function commitPendingTerms(fieldId) {
   autoResize(ta);
   pendingTerms[fieldId] = [];
   renderStagingArea(fieldId);
+  // 同時 commit 對應的部位選擇
+  const locField = STAGING_LOC_MAP[fieldId];
+  if (locField) commitLoc(locField);
 }
 
 function clearPendingTerms(fieldId) {
