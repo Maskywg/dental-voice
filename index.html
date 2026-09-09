@@ -1346,9 +1346,7 @@ function commitPendingTerms(fieldId) {
   const locText = locField ? _getLocPreviewText(locField) : '';
   if (!terms.length && !locText) return;
 
-  const parts = [];
-  if (locText) parts.push(locText);
-  parts.push(...terms);
+  const parts = [...terms];
   const combined = parts.join(' ');
 
   if (combined) {
