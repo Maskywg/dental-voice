@@ -996,14 +996,14 @@ function clearAll() {
 // ── 處置部位 chip 邏輯 ──
 const locSelections = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
 const locPendingQuad = { location: [], nextloc: [], 'edit-location': [], 'edit-nextloc': [] };
-const locPendingNum = { location: new Set(), nextloc: new Set(), 'edit-location': new Set(), 'edit-nextloc': new Set() };
+const locPendingNum = { location: '', nextloc: '', 'edit-location': '', 'edit-nextloc': '' };
 const LOC_DIRECT = ['全口', '上顎', '下顎'];
 
 function toggleQuadrant(fieldId, quad, btn) {
   if (LOC_DIRECT.includes(quad)) {
     // 全口/上顎/下顎：直接設為 pending，不需要齒位數字
     locPendingQuad[fieldId] = [quad];
-    locPendingNum[fieldId].clear();
+    locPendingNum[fieldId] = '';
     document.querySelectorAll(`[data-loc-quad="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
     updateLocPreview(fieldId);
     return;
@@ -1021,9 +1021,13 @@ function toggleQuadrant(fieldId, quad, btn) {
 }
 
 function appendTooth(fieldId, ch, btn) {
-  const s = locPendingNum[fieldId];
-  if (s.has(ch)) { s.delete(ch); if (btn) btn.classList.remove('pending'); }
-  else { s.add(ch); if (btn) btn.classList.add('pending'); }
+  document.querySelectorAll(`[data-loc-num="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
+  if (locPendingNum[fieldId] === ch) {
+    locPendingNum[fieldId] = '';
+  } else {
+    locPendingNum[fieldId] = ch;
+    if (btn) btn.classList.add('pending');
+  }
   updateLocPreview(fieldId);
 }
 
@@ -1031,15 +1035,16 @@ function commitLoc(fieldId) {
   const quads = locPendingQuad[fieldId];
   const nums = [...locPendingNum[fieldId]];
   if (quads.length === 0 && nums.length === 0) return;
-  const numStr = nums.join('');
+  const num = locPendingNum[fieldId];
+  if (quads.length === 0 && num === '') return;
   if (quads.length === 0) {
-    addLocItem(fieldId, numStr);
-  } else if (nums.length === 0) {
+    addLocItem(fieldId, num);
+  } else if (num === '') {
     quads.forEach(q => addLocItem(fieldId, q));
   } else {
-    quads.forEach(q => addLocItem(fieldId, q + numStr));
+    quads.forEach(q => addLocItem(fieldId, q + num));
   }
-  locPendingNum[fieldId].clear();
+  locPendingNum[fieldId] = '';
   document.querySelectorAll(`[data-loc-num="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
   clearPendingQuad(fieldId);
   updateLocPreview(fieldId);
@@ -1335,12 +1340,11 @@ const treatmentItems = { treatment: [], next: [], 'edit-treatment': [], 'edit-ne
 
 function _getLocPreviewText(locField) {
   const quads = locPendingQuad[locField] || [];
-  const nums = [...(locPendingNum[locField] || [])];
-  if (!quads.length && !nums.length) return '';
-  if (!quads.length) return nums.join('');
-  if (!nums.length) return quads.join(' ');
-  const numStr = nums.join('');
-  return quads.map(q => q + numStr).join(' ');
+  const num = locPendingNum[locField] || '';
+  if (!quads.length && !num) return '';
+  if (!quads.length) return num;
+  if (!num) return quads.join(' ');
+  return quads.map(q => q + num).join(' ');
 }
 
 function commitPendingTerms(fieldId) {
@@ -1367,7 +1371,7 @@ function clearPendingTerms(fieldId) {
   pendingTerms[fieldId] = [];
   const locField = STAGING_LOC_MAP[fieldId];
   if (locField) {
-    locPendingNum[locField].clear();
+    locPendingNum[locField] = '';
     clearPendingQuad(locField);
   }
   renderStagingArea(fieldId);
