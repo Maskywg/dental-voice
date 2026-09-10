@@ -957,7 +957,7 @@ function renderHistory() {
         </div>
       </div>
       <div class="h-row">本次：${h.treatment}</div>
-      ${(h.next || h.nextloc) ? `<div class="h-row">下次：${[h.nextloc, h.next].filter(Boolean).join(' ')}</div>` : ''}
+      ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
       ${h.note ? `<div class="h-row">📝 交代：${h.note}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
       <div class="h-time">${h.time}</div>
