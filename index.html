@@ -1341,28 +1341,13 @@ function _getLocPreviewText(locField) {
 }
 
 function commitAndAddLoc(fieldId) {
-  // 加入彙整但保留療程 chip，只清除部位，讓使用者繼續選下一個部位
-  const terms = pendingTerms[fieldId] || [];
+  // 把目前選的部位加進 locSelections（累積），清除選取器，讓使用者繼續選下一個部位
   const locField = STAGING_LOC_MAP[fieldId];
-  const locText = locField ? _getLocPreviewText(locField) : '';
-  if (!terms.length && !locText) return;
-  const parts = [...terms];
-  if (locText) parts.push(locText);
-  const combined = parts.join(' ');
-  if (combined) {
-    treatmentItems[fieldId].push(combined);
-    updateTreatmentDisplay(fieldId);
-  }
-  // 清除部位，保留療程
-  if (locField) {
-    locSelections[locField] = [];
-    locPendingNum[locField] = '';
-    document.querySelectorAll(`[data-loc-num="${locField}"]`).forEach(b => b.classList.remove('pending'));
-    clearPendingQuad(locField);
-    updateLocDisplay(locField);
-  }
-  // pendingTerms 保留，renderStagingArea 只更新部位 pill
-  renderStagingArea(fieldId);
+  if (!locField) return;
+  const locText = _getLocPreviewText(locField);
+  if (!locText) return;
+  commitLoc(locField); // 加進 locSelections，清除 picker
+  renderStagingArea(fieldId); // 更新暫存區顯示（部位 pill 會更新）
 }
 
 function commitPendingTerms(fieldId) {
