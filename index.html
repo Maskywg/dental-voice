@@ -1290,6 +1290,7 @@ const QUICK_NOTES = [
 
 const STAGING_FIELDS = new Set(['treatment', 'next', 'edit-treatment', 'edit-next']);
 const pendingTerms = {};
+const stagedLocs = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
 
 function appendQuickTerm(fieldId, term) {
   if (STAGING_FIELDS.has(fieldId)) {
@@ -1312,9 +1313,13 @@ function renderStagingArea(fieldId) {
   const terms = pendingTerms[fieldId] || [];
   const locField = STAGING_LOC_MAP[fieldId];
   const locText = locField ? _getLocPreviewText(locField) : '';
-  const hasContent = terms.length > 0 || locText;
+  const staged = stagedLocs[fieldId] || [];
+  const hasContent = terms.length > 0 || locText || staged.length > 0;
   staging.style.display = hasContent ? 'block' : 'none';
   let html = '';
+  staged.forEach((l, i) => {
+    html += `<span class="term-staging-pill term-staging-loc">📍 ${l}<button onclick="removeStagedLoc('${fieldId}',${i})">✕</button></span>`;
+  });
   if (locText) html += `<span class="term-staging-pill term-staging-loc">📍 ${locText}</span>`;
   html += terms.map((t, i) => `<span class="term-staging-pill">${t}<button onclick="removePendingTerm('${fieldId}',${i})">✕</button></span>`).join('');
   pillsEl.innerHTML = html;
@@ -1323,6 +1328,12 @@ function renderStagingArea(fieldId) {
 function removePendingTerm(fieldId, idx) {
   if (pendingTerms[fieldId]) {
     pendingTerms[fieldId].splice(idx, 1);
+    renderStagingArea(fieldId);
+  }
+}
+function removeStagedLoc(fieldId, idx) {
+  if (stagedLocs[fieldId]) {
+    stagedLocs[fieldId].splice(idx, 1);
     renderStagingArea(fieldId);
   }
 }
@@ -1341,23 +1352,27 @@ function _getLocPreviewText(locField) {
 }
 
 function commitAndAddLoc(fieldId) {
-  // 把目前選的部位加進 locSelections（累積），清除選取器，讓使用者繼續選下一個部位
   const locField = STAGING_LOC_MAP[fieldId];
   if (!locField) return;
   const locText = _getLocPreviewText(locField);
   if (!locText) return;
-  commitLoc(locField); // 加進 locSelections，清除 picker
-  renderStagingArea(fieldId); // 更新暫存區顯示（部位 pill 會更新）
+  stagedLocs[fieldId].push(locText);
+  // 清除選取器（不動 locSelections）
+  locPendingNum[locField] = '';
+  document.querySelectorAll(`[data-loc-num="${locField}"]`).forEach(b => b.classList.remove('pending'));
+  clearPendingQuad(locField);
+  updateLocPreview(locField);
+  renderStagingArea(fieldId);
 }
 
 function commitPendingTerms(fieldId) {
   const terms = pendingTerms[fieldId] || [];
   const locField = STAGING_LOC_MAP[fieldId];
   const locText = locField ? _getLocPreviewText(locField) : '';
-  if (!terms.length && !locText) return;
+  const allLocs = [...(stagedLocs[fieldId] || []), ...(locText ? [locText] : [])];
+  if (!terms.length && !allLocs.length) return;
 
-  const parts = [...terms];
-  if (locText) parts.push(locText);
+  const parts = [...terms, ...allLocs];
   const combined = parts.join(' ');
 
   if (combined) {
@@ -1365,7 +1380,15 @@ function commitPendingTerms(fieldId) {
     updateTreatmentDisplay(fieldId);
   }
 
-  if (locField) commitLoc(locField);
+  // 清除部位選取器與暫存
+  if (locField) {
+    locPendingNum[locField] = '';
+    document.querySelectorAll(`[data-loc-num="${locField}"]`).forEach(b => b.classList.remove('pending'));
+    clearPendingQuad(locField);
+    locSelections[locField] = [];
+    updateLocDisplay(locField);
+  }
+  stagedLocs[fieldId] = [];
   pendingTerms[fieldId] = [];
   renderStagingArea(fieldId);
 }
