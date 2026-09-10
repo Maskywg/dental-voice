@@ -261,8 +261,8 @@
   <div class="term-staging" id="staging-treatment">
     <div class="term-staging-pills" id="staging-treatment-pills"></div>
     <div class="term-staging-actions">
-      <button class="term-staging-confirm" onclick="commitPendingTerms('treatment')">✓ 加入彙整</button>
       <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('treatment')">＋ 增加部位</button>
+      <button class="term-staging-confirm" onclick="commitPendingTerms('treatment')">✓ 加入彙整</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('treatment')">✕ 清除</button>
     </div>
   </div>
@@ -316,8 +316,8 @@
   <div class="term-staging" id="staging-next">
     <div class="term-staging-pills" id="staging-next-pills"></div>
     <div class="term-staging-actions">
-      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
       <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
+      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
     </div>
   </div>
@@ -439,6 +439,7 @@
       <div class="term-staging" id="staging-edit-treatment">
         <div class="term-staging-pills" id="staging-edit-treatment-pills"></div>
         <div class="term-staging-actions">
+          <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('edit-treatment')">＋ 增加部位</button>
           <button class="term-staging-confirm" onclick="commitPendingTerms('edit-treatment')">✓ 加入彙整</button>
           <button class="term-staging-clear" onclick="clearPendingTerms('edit-treatment')">✕ 清除</button>
         </div>
@@ -490,6 +491,7 @@
       <div class="term-staging" id="staging-edit-next">
         <div class="term-staging-pills" id="staging-edit-next-pills"></div>
         <div class="term-staging-actions">
+          <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('edit-next')">＋ 增加部位</button>
           <button class="term-staging-confirm" onclick="commitPendingTerms('edit-next')">✓ 加入彙整</button>
           <button class="term-staging-clear" onclick="clearPendingTerms('edit-next')">✕ 清除</button>
         </div>
