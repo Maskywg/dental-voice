@@ -909,8 +909,8 @@ async function submitData() {
   }
   const name = document.getElementById('name').value.trim();
   const location = document.getElementById('location').value.trim();
-  const treatment = [...(treatmentItems['treatment'] || []), document.getElementById('treatment').value.trim()].filter(Boolean).join(' ');
-  const next = [...(treatmentItems['next'] || []), document.getElementById('next').value.trim()].filter(Boolean).join(' ');
+  const treatment = [...(treatmentItems['treatment'] || []), document.getElementById('treatment').value.trim()].filter(Boolean).join('、');
+  const next = [...(treatmentItems['next'] || []), document.getElementById('next').value.trim()].filter(Boolean).join('、');
   const nextloc = document.getElementById('nextloc').value.trim();
   const note = document.getElementById('note').value.trim();
   const lab = document.getElementById('lab').value;
@@ -956,7 +956,7 @@ function renderHistory() {
           <button onclick="deleteHistoryItem(${i})" style="background:#fff5f5;border:1px solid #fed7d7;color:#c53030;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">🗑️ 刪除</button>
         </div>
       </div>
-      <div class="h-row">本次：${[h.location, h.treatment].filter(Boolean).join(' ')}</div>
+      <div class="h-row">本次：${h.treatment}</div>
       ${(h.next || h.nextloc) ? `<div class="h-row">下次：${[h.nextloc, h.next].filter(Boolean).join(' ')}</div>` : ''}
       ${h.note ? `<div class="h-row">📝 交代：${h.note}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
@@ -1158,8 +1158,8 @@ async function saveEdit() {
   const h = history[editIndex];
   const name = document.getElementById('edit-name').value.trim();
   const location = document.getElementById('edit-location').value;
-  const treatment = [...(treatmentItems['edit-treatment'] || []), document.getElementById('edit-treatment').value.trim()].filter(Boolean).join(' ');
-  const next = [...(treatmentItems['edit-next'] || []), document.getElementById('edit-next').value.trim()].filter(Boolean).join(' ');
+  const treatment = [...(treatmentItems['edit-treatment'] || []), document.getElementById('edit-treatment').value.trim()].filter(Boolean).join('、');
+  const next = [...(treatmentItems['edit-next'] || []), document.getElementById('edit-next').value.trim()].filter(Boolean).join('、');
   const nextloc = document.getElementById('edit-nextloc').value;
   const note = document.getElementById('edit-note').value.trim();
   const lab = document.getElementById('edit-lab').value;
@@ -1344,7 +1344,9 @@ function commitPendingTerms(fieldId) {
   const locText = locField ? _getLocPreviewText(locField) : '';
   if (!terms.length && !locText) return;
 
-  const parts = [...terms];
+  const parts = [];
+  if (locText) parts.push(locText);
+  parts.push(...terms);
   const combined = parts.join(' ');
 
   if (combined) {
