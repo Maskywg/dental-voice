@@ -1031,12 +1031,13 @@ function commitLoc(fieldId) {
   const quads = locPendingQuad[fieldId];
   const nums = [...locPendingNum[fieldId]];
   if (quads.length === 0 && nums.length === 0) return;
+  const numStr = nums.join('');
   if (quads.length === 0) {
-    nums.forEach(n => addLocItem(fieldId, n));
+    addLocItem(fieldId, numStr);
   } else if (nums.length === 0) {
     quads.forEach(q => addLocItem(fieldId, q));
   } else {
-    quads.forEach(q => nums.forEach(n => addLocItem(fieldId, q + n)));
+    quads.forEach(q => addLocItem(fieldId, q + numStr));
   }
   locPendingNum[fieldId].clear();
   document.querySelectorAll(`[data-loc-num="${fieldId}"]`).forEach(b => b.classList.remove('pending'));
@@ -1336,11 +1337,10 @@ function _getLocPreviewText(locField) {
   const quads = locPendingQuad[locField] || [];
   const nums = [...(locPendingNum[locField] || [])];
   if (!quads.length && !nums.length) return '';
-  if (!quads.length) return nums.join(' ');
+  if (!quads.length) return nums.join('');
   if (!nums.length) return quads.join(' ');
-  const parts = [];
-  quads.forEach(q => nums.forEach(n => parts.push(q + n)));
-  return parts.join(' ');
+  const numStr = nums.join('');
+  return quads.map(q => q + numStr).join(' ');
 }
 
 function commitPendingTerms(fieldId) {
