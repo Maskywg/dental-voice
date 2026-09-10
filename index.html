@@ -262,6 +262,7 @@
     <div class="term-staging-pills" id="staging-treatment-pills"></div>
     <div class="term-staging-actions">
       <button class="term-staging-confirm" onclick="commitPendingTerms('treatment')">✓ 加入彙整</button>
+      <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('treatment')">＋ 增加部位</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('treatment')">✕ 清除</button>
     </div>
   </div>
@@ -316,6 +317,7 @@
     <div class="term-staging-pills" id="staging-next-pills"></div>
     <div class="term-staging-actions">
       <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
+      <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
     </div>
   </div>
@@ -1336,6 +1338,31 @@ function _getLocPreviewText(locField) {
   if (!quads.length) return num;
   if (!num) return quads.join(' ');
   return quads.map(q => q + num).join(' ');
+}
+
+function commitAndAddLoc(fieldId) {
+  // 加入彙整但保留療程 chip，只清除部位，讓使用者繼續選下一個部位
+  const terms = pendingTerms[fieldId] || [];
+  const locField = STAGING_LOC_MAP[fieldId];
+  const locText = locField ? _getLocPreviewText(locField) : '';
+  if (!terms.length && !locText) return;
+  const parts = [...terms];
+  if (locText) parts.push(locText);
+  const combined = parts.join(' ');
+  if (combined) {
+    treatmentItems[fieldId].push(combined);
+    updateTreatmentDisplay(fieldId);
+  }
+  // 清除部位，保留療程
+  if (locField) {
+    locSelections[locField] = [];
+    locPendingNum[locField] = '';
+    document.querySelectorAll(`[data-loc-num="${locField}"]`).forEach(b => b.classList.remove('pending'));
+    clearPendingQuad(locField);
+    updateLocDisplay(locField);
+  }
+  // pendingTerms 保留，renderStagingArea 只更新部位 pill
+  renderStagingArea(fieldId);
 }
 
 function commitPendingTerms(fieldId) {
