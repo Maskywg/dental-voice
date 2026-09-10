@@ -1020,7 +1020,12 @@ function toggleQuadrant(fieldId, quad, btn) {
   updateLocPreview(fieldId);
 }
 
+const _lastAppend = {};
 function appendTooth(fieldId, ch) {
+  const key = fieldId + ch;
+  const now = Date.now();
+  if (_lastAppend[key] && now - _lastAppend[key] < 300) return;
+  _lastAppend[key] = now;
   locPendingNum[fieldId] += ch;
   updateLocPreview(fieldId);
 }
