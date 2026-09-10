@@ -956,10 +956,8 @@ function renderHistory() {
           <button onclick="deleteHistoryItem(${i})" style="background:#fff5f5;border:1px solid #fed7d7;color:#c53030;border-radius:8px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">🗑️ 刪除</button>
         </div>
       </div>
-      ${h.location ? `<div class="h-row">📍 本次部位：${h.location}</div>` : ''}
-      <div class="h-row">本次：${h.treatment}</div>
-      ${h.next ? `<div class="h-row">下次：${h.next}</div>` : ''}
-      ${h.nextloc ? `<div class="h-row">📍 下次部位：${h.nextloc}</div>` : ''}
+      <div class="h-row">本次：${[h.location, h.treatment].filter(Boolean).join(' ')}</div>
+      ${(h.next || h.nextloc) ? `<div class="h-row">下次：${[h.nextloc, h.next].filter(Boolean).join(' ')}</div>` : ''}
       ${h.note ? `<div class="h-row">📝 交代：${h.note}</div>` : ''}
       ${h.lab ? `<div class="h-row">🏭 技工所：${h.lab}</div>` : ''}
       <div class="h-time">${h.time}</div>
