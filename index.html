@@ -227,7 +227,46 @@
 </head>
 <body>
 
-<h1>🦷 牙科醫囑語音輸入</h1>
+<h1>🦷 牙科醫囑語音輸入 <button onclick="showHelp()" style="background:#e2e8f0;border:none;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;font-weight:700;color:#4a5568;vertical-align:middle;line-height:1;">ℹ</button></h1>
+
+<!-- 使用說明 Modal -->
+<div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;overflow-y:auto;">
+  <div style="background:white;max-width:520px;margin:20px auto;border-radius:16px;padding:24px 20px;position:relative;">
+    <button onclick="closeHelp()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#718096;">✕</button>
+    <h2 style="font-size:1.1rem;color:#2d3748;margin:0 0 16px;">📖 使用說明</h2>
+
+    <h3 style="font-size:0.9rem;color:#2b6cb0;margin:12px 0 6px;">🎤 語音輸入</h3>
+    <p style="font-size:0.85rem;color:#4a5568;margin:0 0 6px;">點擊 🎤 按鈕即可開始語音輸入。iOS 裝置請先至 <b>設定 → 一般 → 鍵盤 → 開啟「語音輸入」</b>。</p>
+
+    <h3 style="font-size:0.9rem;color:#2b6cb0;margin:12px 0 6px;">💊 本次／下次療程</h3>
+    <ul style="font-size:0.85rem;color:#4a5568;margin:0 0 6px;padding-left:18px;">
+      <li>點選上方快速詞（療程名稱）→ 出現在暫存區</li>
+      <li>選擇左上／左下／右上／右下象限 + 牙位數字</li>
+      <li><b>＋ 增加部位</b>：同一療程加入多個部位（例：OD 左上6 右下4）</li>
+      <li><b>✓ 加入彙整</b>：將暫存區內容送入下方彙整欄</li>
+      <li>彙整欄每筆可個別<b>修改</b>或<b>刪除</b></li>
+    </ul>
+
+    <h3 style="font-size:0.9rem;color:#2b6cb0;margin:12px 0 6px;">🟣 下下次療程</h3>
+    <ul style="font-size:0.85rem;color:#4a5568;margin:0 0 6px;padding-left:18px;">
+      <li>在下次療程區點「<b>下下次彙整</b>」分頁切換</li>
+      <li>選單與部位選擇器與下次共用，但彙整欄獨立</li>
+      <li>送出時自動附加至<b>交代事項</b>（格式：下下次：xxx）</li>
+    </ul>
+
+    <h3 style="font-size:0.9rem;color:#2b6cb0;margin:12px 0 6px;">📋 交代事項</h3>
+    <p style="font-size:0.85rem;color:#4a5568;margin:0 0 6px;">點選下方快速詞（備藥、簽名、約診等），或直接語音輸入。</p>
+
+    <h3 style="font-size:0.9rem;color:#2b6cb0;margin:12px 0 6px;">📤 送出與歷史紀錄</h3>
+    <ul style="font-size:0.85rem;color:#4a5568;margin:0 0 6px;padding-left:18px;">
+      <li>點「<b>送出記錄</b>」上傳至 Google Sheet</li>
+      <li>「<b>歷史紀錄</b>」可查詢過去資料，長按可修改或刪除</li>
+      <li>「<b>☁️ 重新上傳本機</b>」：手機離線時產生的資料可補傳</li>
+    </ul>
+
+    <button onclick="closeHelp()" style="display:block;width:100%;margin-top:16px;padding:10px;background:#2b6cb0;color:white;border:none;border-radius:10px;font-size:0.95rem;cursor:pointer;font-family:inherit;">關閉</button>
+  </div>
+</div>
 
 <div class="config-banner" id="configBanner">
   ⚙️ 首次使用請先設定 Google Sheet 連結。<br>
@@ -1270,6 +1309,9 @@ function showToast(msg, type = '') {
   t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => { t.className = 'toast'; }, 3000);
 }
+
+function showHelp() { document.getElementById('helpModal').style.display = 'block'; }
+function closeHelp() { document.getElementById('helpModal').style.display = 'none'; }
 
 function showConfig() {
   const modal = document.getElementById('configModal');
