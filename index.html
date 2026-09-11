@@ -1087,6 +1087,7 @@ function updateLocPreview(fieldId) {
   // 更新對應的暫存列
   const stagingField = LOC_STAGING_MAP[fieldId];
   if (stagingField) renderStagingArea(stagingField);
+  if (fieldId === 'nextloc') renderStagingArea('afternext');
 }
 
 function addLocItem(fieldId, value) {
@@ -1389,7 +1390,7 @@ function switchNextTab(tab) {
   renderQuickChips('qc-next', tab);
 }
 const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
-const treatmentItems = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
+const treatmentItems = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [] };
 
 function _getLocPreviewText(locField) {
   const quads = locPendingQuad[locField] || [];
