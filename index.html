@@ -312,15 +312,36 @@
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
+  <!-- 分頁切換 -->
+  <div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button id="tab-next" onclick="switchNextTab('next')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #9ae6b4;background:#276749;color:white;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下次</button>
+    <button id="tab-afternext" onclick="switchNextTab('afternext')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #d6bcfa;background:#faf5ff;color:#6b46c1;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下下次</button>
+  </div>
+  <!-- 共用選單（依分頁動態切換 fieldId） -->
   <div class="quick-chips" id="qc-next"></div>
-  <div class="term-staging" id="staging-next">
-    <div class="term-staging-pills" id="staging-next-pills"></div>
-    <div class="term-staging-actions">
-      <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
-      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入下次彙整</button>
-      <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
+  <!-- 下次暫存區 -->
+  <div id="panel-next">
+    <div class="term-staging" id="staging-next">
+      <div class="term-staging-pills" id="staging-next-pills"></div>
+      <div class="term-staging-actions">
+        <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
+        <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
+        <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
+      </div>
     </div>
   </div>
+  <!-- 下下次暫存區 -->
+  <div id="panel-afternext" style="display:none;">
+    <div class="term-staging" id="staging-afternext" style="border-color:#d6bcfa;background:#faf5ff;">
+      <div class="term-staging-pills" id="staging-afternext-pills"></div>
+      <div class="term-staging-actions">
+        <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('afternext')">＋ 增加部位</button>
+        <button class="term-staging-confirm" style="background:#6b46c1;" onclick="commitPendingTerms('afternext')">✓ 加入彙整</button>
+        <button class="term-staging-clear" onclick="clearPendingTerms('afternext')">✕ 清除</button>
+      </div>
+    </div>
+  </div>
+  <!-- 共用部位選擇器 -->
   <div class="loc-group" data-loc-quad-group="nextloc">
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左上',this)">左上</button>
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左下',this)">左下</button>
@@ -354,11 +375,10 @@
   <div class="loc-preview" id="nextloc-preview"></div>
   <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
-  <div style="margin-top:8px;">
-    <button onclick="commitPendingTermsToAfternext()" style="background:#6b46c1;color:white;border:none;border-radius:16px;padding:6px 14px;font-size:0.82rem;cursor:pointer;font-family:inherit;">✓ 加入下下次療程項目</button>
-  </div>
   <div class="loc-divider" style="margin-top:12px;"></div>
+  <!-- 下次彙整欄 -->
   <div class="treatment-display" id="next-display"></div>
+  <!-- 下下次彙整欄 -->
   <div id="afternext-display" style="display:none;margin-top:6px;padding:8px 10px;background:#faf5ff;border:1.5px solid #d6bcfa;border-radius:10px;">
     <div style="font-size:0.75rem;color:#6b46c1;font-weight:600;margin-bottom:4px;">下下次療程可能的項目</div>
     <div id="afternext-display-items"></div>
@@ -999,14 +1019,14 @@ function clearAll() {
   document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
-  treatmentItems['afternext'] = [];
-  updateAfternextDisplay();
-  ['treatment', 'next'].forEach(f => {
+  ['treatment', 'next', 'afternext'].forEach(f => {
     pendingTerms[f] = [];
+    stagedLocs[f] = [];
     treatmentItems[f] = [];
     renderStagingArea(f);
     updateTreatmentDisplay(f);
   });
+  switchNextTab('next');
   setStatus('點擊 🎤 開始語音輸入');
 }
 
@@ -1304,9 +1324,10 @@ const QUICK_NOTES = [
   { group: '約診', terms: ['暫不約', '要趕', '急件', '約密集', '原約取消', '照原約', '約診一個月後', '下次約診手術時間', '回去考慮再打來約'] },
 ];
 
-const STAGING_FIELDS = new Set(['treatment', 'next', 'edit-treatment', 'edit-next']);
+const STAGING_FIELDS = new Set(['treatment', 'next', 'afternext', 'edit-treatment', 'edit-next']);
 const pendingTerms = {};
-const stagedLocs = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
+const stagedLocs = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [] };
+let currentNextTab = 'next';
 
 function appendQuickTerm(fieldId, term) {
   if (STAGING_FIELDS.has(fieldId)) {
@@ -1354,7 +1375,19 @@ function removeStagedLoc(fieldId, idx) {
   }
 }
 
-const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', afternext: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+
+function switchNextTab(tab) {
+  currentNextTab = tab;
+  const isNext = tab === 'next';
+  document.getElementById('tab-next').style.background = isNext ? '#276749' : '#f0fff4';
+  document.getElementById('tab-next').style.color = isNext ? 'white' : '#276749';
+  document.getElementById('tab-afternext').style.background = isNext ? '#faf5ff' : '#6b46c1';
+  document.getElementById('tab-afternext').style.color = isNext ? '#6b46c1' : 'white';
+  document.getElementById('panel-next').style.display = isNext ? '' : 'none';
+  document.getElementById('panel-afternext').style.display = isNext ? 'none' : '';
+  renderQuickChips('qc-next', tab);
+}
 const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
 const treatmentItems = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
 
@@ -1409,29 +1442,6 @@ function commitPendingTerms(fieldId) {
   renderStagingArea(fieldId);
 }
 
-function commitPendingTermsToAfternext() {
-  const terms = pendingTerms['next'] || [];
-  const locText = _getLocPreviewText('nextloc');
-  const allLocs = [...(stagedLocs['next'] || []), ...(locText ? [locText] : [])];
-  if (!terms.length && !allLocs.length) return;
-
-  const combined = [...terms, ...allLocs].join(' ');
-  if (combined) {
-    if (!treatmentItems['afternext']) treatmentItems['afternext'] = [];
-    treatmentItems['afternext'].push(combined);
-    updateAfternextDisplay();
-  }
-
-  locPendingNum['nextloc'] = '';
-  document.querySelectorAll('[data-loc-num="nextloc"]').forEach(b => b.classList.remove('pending'));
-  clearPendingQuad('nextloc');
-  locSelections['nextloc'] = [];
-  updateLocDisplay('nextloc');
-  stagedLocs['next'] = [];
-  pendingTerms['next'] = [];
-  renderStagingArea('next');
-}
-
 function updateAfternextDisplay() {
   const items = treatmentItems['afternext'] || [];
   const wrap = document.getElementById('afternext-display');
@@ -1461,6 +1471,7 @@ function clearPendingTerms(fieldId) {
 }
 
 function updateTreatmentDisplay(fieldId) {
+  if (fieldId === 'afternext') { updateAfternextDisplay(); return; }
   const el = document.getElementById(fieldId + '-display');
   if (!el) return;
   const items = treatmentItems[fieldId] || [];
