@@ -321,9 +321,6 @@
       <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
     </div>
   </div>
-  <div style="margin-top:6px;">
-    <button onclick="commitPendingTermsToAfternext()" style="background:#6b46c1;color:white;border:none;border-radius:16px;padding:6px 14px;font-size:0.82rem;cursor:pointer;font-family:inherit;">✓ 加入下下次療程項目</button>
-  </div>
   <div class="loc-group" data-loc-quad-group="nextloc">
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左上',this)">左上</button>
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左下',this)">左下</button>
@@ -357,6 +354,9 @@
   <div class="loc-preview" id="nextloc-preview"></div>
   <div class="loc-result" id="nextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
   <input type="hidden" id="nextloc" value="">
+  <div style="margin-top:8px;">
+    <button onclick="commitPendingTermsToAfternext()" style="background:#6b46c1;color:white;border:none;border-radius:16px;padding:6px 14px;font-size:0.82rem;cursor:pointer;font-family:inherit;">✓ 加入下下次療程項目</button>
+  </div>
   <div class="loc-divider" style="margin-top:12px;"></div>
   <div class="treatment-display" id="next-display"></div>
   <div id="afternext-display" style="display:none;margin-top:6px;padding:8px 10px;background:#faf5ff;border:1.5px solid #d6bcfa;border-radius:10px;">
