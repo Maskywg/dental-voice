@@ -317,7 +317,8 @@
     <div class="term-staging-pills" id="staging-next-pills"></div>
     <div class="term-staging-actions">
       <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
-      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入彙整</button>
+      <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入下次彙整</button>
+      <button class="term-staging-confirm" style="background:#6b46c1;" onclick="commitPendingTermsToAfternext()">✓ 加入下下次</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
     </div>
   </div>
@@ -356,6 +357,10 @@
   <input type="hidden" id="nextloc" value="">
   <div class="loc-divider" style="margin-top:12px;"></div>
   <div class="treatment-display" id="next-display"></div>
+  <div id="afternext-display" style="display:none;margin-top:6px;padding:8px 10px;background:#faf5ff;border:1.5px solid #d6bcfa;border-radius:10px;">
+    <div style="font-size:0.75rem;color:#6b46c1;font-weight:600;margin-bottom:4px;">下下次療程可能的項目</div>
+    <div id="afternext-display-items"></div>
+  </div>
   <div class="field-row" style="margin-top:6px;">
     <textarea id="next" rows="2" placeholder="語音補充輸入"></textarea>
     <button class="mic-btn" id="mic-next" onclick="toggleVoice('next')" title="語音輸入">🎤</button>
@@ -916,7 +921,11 @@ async function submitData() {
   const treatment = [...(treatmentItems['treatment'] || []), document.getElementById('treatment').value.trim()].filter(Boolean).join('、');
   const next = [...(treatmentItems['next'] || []), document.getElementById('next').value.trim()].filter(Boolean).join('、');
   const nextloc = document.getElementById('nextloc').value.trim();
-  const note = document.getElementById('note').value.trim();
+  const afternextItems = (treatmentItems['afternext'] || []).filter(Boolean);
+  const noteBase = document.getElementById('note').value.trim();
+  const note = afternextItems.length
+    ? [noteBase, '下下次：' + afternextItems.join('、')].filter(Boolean).join('、')
+    : noteBase;
   const lab = document.getElementById('lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
@@ -988,6 +997,8 @@ function clearAll() {
   document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
+  treatmentItems['afternext'] = [];
+  updateAfternextDisplay();
   ['treatment', 'next'].forEach(f => {
     pendingTerms[f] = [];
     treatmentItems[f] = [];
@@ -1394,6 +1405,47 @@ function commitPendingTerms(fieldId) {
   stagedLocs[fieldId] = [];
   pendingTerms[fieldId] = [];
   renderStagingArea(fieldId);
+}
+
+function commitPendingTermsToAfternext() {
+  const terms = pendingTerms['next'] || [];
+  const locText = _getLocPreviewText('nextloc');
+  const allLocs = [...(stagedLocs['next'] || []), ...(locText ? [locText] : [])];
+  if (!terms.length && !allLocs.length) return;
+
+  const combined = [...terms, ...allLocs].join(' ');
+  if (combined) {
+    if (!treatmentItems['afternext']) treatmentItems['afternext'] = [];
+    treatmentItems['afternext'].push(combined);
+    updateAfternextDisplay();
+  }
+
+  locPendingNum['nextloc'] = '';
+  document.querySelectorAll('[data-loc-num="nextloc"]').forEach(b => b.classList.remove('pending'));
+  clearPendingQuad('nextloc');
+  locSelections['nextloc'] = [];
+  updateLocDisplay('nextloc');
+  stagedLocs['next'] = [];
+  pendingTerms['next'] = [];
+  renderStagingArea('next');
+}
+
+function updateAfternextDisplay() {
+  const items = treatmentItems['afternext'] || [];
+  const wrap = document.getElementById('afternext-display');
+  const list = document.getElementById('afternext-display-items');
+  if (!wrap || !list) return;
+  if (!items.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = items.map((t, i) =>
+    `<span style="display:inline-flex;align-items:center;background:#e9d8fd;color:#44337a;border-radius:14px;padding:3px 10px;margin:2px;font-size:0.82rem;">${t}<button onclick="removeAfternextItem(${i})" style="background:none;border:none;cursor:pointer;color:#6b46c1;margin-left:4px;font-size:0.85rem;">✕</button></span>`
+  ).join('');
+}
+
+function removeAfternextItem(i) {
+  if (!treatmentItems['afternext']) return;
+  treatmentItems['afternext'].splice(i, 1);
+  updateAfternextDisplay();
 }
 
 function clearPendingTerms(fieldId) {
