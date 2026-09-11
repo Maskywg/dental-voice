@@ -223,6 +223,8 @@
   .qc-btn-next:active { background: #276749; color: white; transform: scale(0.95); }
   .qc-btn-note { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #c8a97e; background: #fdf6ee; font-size: 0.82rem; color: #7b4f1e; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
   .qc-btn-note:active { background: #7b4f1e; color: white; transform: scale(0.95); }
+  .qc-btn-afternext { padding: 5px 11px; border-radius: 16px; border: 1.5px solid #d6bcfa; background: #faf5ff; font-size: 0.82rem; color: #6b46c1; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .qc-btn-afternext:active { background: #6b46c1; color: white; transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -308,6 +310,55 @@
 </div>
 
 <div class="section-divider"></div>
+
+<!-- 下下次療程可能的項目 -->
+<div class="card" style="border-left:3px solid #9f7aea;">
+  <div class="field-label" style="color:#6b46c1;">下下次療程可能的項目</div>
+  <div class="quick-chips" id="qc-afternext"></div>
+  <div class="term-staging" id="staging-afternext">
+    <div class="term-staging-pills" id="staging-afternext-pills"></div>
+    <div class="term-staging-actions">
+      <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('afternext')">＋ 增加部位</button>
+      <button class="term-staging-confirm" onclick="commitPendingTerms('afternext')">✓ 加入彙整</button>
+      <button class="term-staging-clear" onclick="clearPendingTerms('afternext')">✕ 清除</button>
+    </div>
+  </div>
+  <div class="loc-group" data-loc-quad-group="afternextloc">
+    <button class="loc-chip" data-loc-quad="afternextloc" onclick="toggleQuadrant('afternextloc','左上',this)">左上</button>
+    <button class="loc-chip" data-loc-quad="afternextloc" onclick="toggleQuadrant('afternextloc','左下',this)">左下</button>
+    <button class="loc-chip" data-loc-quad="afternextloc" onclick="toggleQuadrant('afternextloc','右上',this)">右上</button>
+    <button class="loc-chip" data-loc-quad="afternextloc" onclick="toggleQuadrant('afternextloc','右下',this)">右下</button>
+    <button class="loc-chip" onclick="toggleQuadrant('afternextloc','全口',this)">全口</button>
+    <button class="loc-chip" onclick="toggleQuadrant('afternextloc','上顎',this)">上顎</button>
+    <button class="loc-chip" onclick="toggleQuadrant('afternextloc','下顎',this)">下顎</button>
+  </div>
+  <div class="loc-divider"></div>
+  <div class="loc-group">
+    <button class="loc-chip" onclick="appendTooth('afternextloc','1',this)" data-loc-num="afternextloc">1</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','2',this)" data-loc-num="afternextloc">2</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','3',this)" data-loc-num="afternextloc">3</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','4',this)" data-loc-num="afternextloc">4</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','5',this)" data-loc-num="afternextloc">5</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','6',this)" data-loc-num="afternextloc">6</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','7',this)" data-loc-num="afternextloc">7</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','8',this)" data-loc-num="afternextloc">8</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','9',this)" data-loc-num="afternextloc">9</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','X',this)" data-loc-num="afternextloc">X</button>
+  </div>
+  <div class="loc-group">
+    <button class="loc-chip" onclick="appendTooth('afternextloc','A',this)" data-loc-num="afternextloc">A</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','B',this)" data-loc-num="afternextloc">B</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','C',this)" data-loc-num="afternextloc">C</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','D',this)" data-loc-num="afternextloc">D</button>
+    <button class="loc-chip" onclick="appendTooth('afternextloc','E',this)" data-loc-num="afternextloc">E</button>
+    <button class="loc-chip loc-chip-confirm" onclick="commitLoc('afternextloc')" id="loc-confirm-afternextloc" style="display:none">加入</button>
+  </div>
+  <div class="loc-preview" id="afternextloc-preview"></div>
+  <div class="loc-result" id="afternextloc-result"><span style="color:#a0aec0">尚未選擇</span></div>
+  <input type="hidden" id="afternextloc" value="">
+  <div class="loc-divider" style="margin-top:12px;"></div>
+  <div class="treatment-display" id="afternext-display"></div>
+</div>
 
 <!-- 下次可能療程 -->
 <div class="card">
@@ -742,6 +793,7 @@ function init() {
   loadSharedHistory();
   // 初始化快速詞按鈕
   renderQuickChips('qc-treatment', 'treatment');
+  renderQuickChips('qc-afternext', 'afternext');
   renderQuickChips('qc-next', 'next');
   renderQuickChips('qc-edit-treatment', 'edit-treatment');
   renderQuickChips('qc-edit-next', 'edit-next');
@@ -916,7 +968,11 @@ async function submitData() {
   const treatment = [...(treatmentItems['treatment'] || []), document.getElementById('treatment').value.trim()].filter(Boolean).join('、');
   const next = [...(treatmentItems['next'] || []), document.getElementById('next').value.trim()].filter(Boolean).join('、');
   const nextloc = document.getElementById('nextloc').value.trim();
-  const note = document.getElementById('note').value.trim();
+  const afternextItems = (treatmentItems['afternext'] || []).filter(Boolean);
+  const noteBase = document.getElementById('note').value.trim();
+  const note = afternextItems.length
+    ? [noteBase, '下下次：' + afternextItems.join('、')].filter(Boolean).join('、')
+    : noteBase;
   const lab = document.getElementById('lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
@@ -988,7 +1044,8 @@ function clearAll() {
   document.getElementById('name-suggest').innerHTML = '';
   clearLocChips('location');
   clearLocChips('nextloc');
-  ['treatment', 'next'].forEach(f => {
+  clearLocChips('afternextloc');
+  ['treatment', 'next', 'afternext'].forEach(f => {
     pendingTerms[f] = [];
     treatmentItems[f] = [];
     renderStagingArea(f);
@@ -1291,9 +1348,9 @@ const QUICK_NOTES = [
   { group: '約診', terms: ['暫不約', '要趕', '急件', '約密集', '原約取消', '照原約', '約診一個月後', '下次約診手術時間', '回去考慮再打來約'] },
 ];
 
-const STAGING_FIELDS = new Set(['treatment', 'next', 'edit-treatment', 'edit-next']);
+const STAGING_FIELDS = new Set(['treatment', 'next', 'afternext', 'edit-treatment', 'edit-next']);
 const pendingTerms = {};
-const stagedLocs = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
+const stagedLocs = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [] };
 
 function appendQuickTerm(fieldId, term) {
   if (STAGING_FIELDS.has(fieldId)) {
@@ -1341,7 +1398,7 @@ function removeStagedLoc(fieldId, idx) {
   }
 }
 
-const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', afternext: 'afternextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
 const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
 const treatmentItems = { treatment: [], next: [], 'edit-treatment': [], 'edit-next': [] };
 
@@ -1438,7 +1495,8 @@ function renderQuickChips(containerId, fieldId, isNote = false) {
   if (!el) return;
   const list = isNote ? QUICK_NOTES : QUICK_TERMS;
   const isNext = fieldId === 'next' || fieldId === 'edit-next';
-  const btnClass = isNote ? 'qc-btn-note' : (isNext ? 'qc-btn-next' : 'qc-btn');
+  const isAfternext = fieldId === 'afternext';
+  const btnClass = isNote ? 'qc-btn-note' : (isAfternext ? 'qc-btn-afternext' : (isNext ? 'qc-btn-next' : 'qc-btn'));
   el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
     <div class="qc-group">
