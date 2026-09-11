@@ -318,9 +318,11 @@
     <div class="term-staging-actions">
       <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('next')">＋ 增加部位</button>
       <button class="term-staging-confirm" onclick="commitPendingTerms('next')">✓ 加入下次彙整</button>
-      <button class="term-staging-confirm" style="background:#6b46c1;" onclick="commitPendingTermsToAfternext()">✓ 加入下下次</button>
       <button class="term-staging-clear" onclick="clearPendingTerms('next')">✕ 清除</button>
     </div>
+  </div>
+  <div style="margin-top:6px;">
+    <button onclick="commitPendingTermsToAfternext()" style="background:#6b46c1;color:white;border:none;border-radius:16px;padding:6px 14px;font-size:0.82rem;cursor:pointer;font-family:inherit;">✓ 加入下下次療程項目</button>
   </div>
   <div class="loc-group" data-loc-quad-group="nextloc">
     <button class="loc-chip" data-loc-quad="nextloc" onclick="toggleQuadrant('nextloc','左上',this)">左上</button>
