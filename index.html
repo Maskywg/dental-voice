@@ -227,7 +227,10 @@
 </head>
 <body>
 
-<h1>🦷 牙科醫囑語音輸入 <button onclick="showHelp()" style="background:#e2e8f0;border:none;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;font-weight:700;color:#4a5568;vertical-align:middle;line-height:1;">ℹ</button></h1>
+<h1 style="display:flex;align-items:center;justify-content:space-between;">
+  <span>🦷 牙科醫囑語音輸入</span>
+  <button onclick="showHelp()" style="background:#e2e8f0;border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;font-weight:700;color:#4a5568;flex-shrink:0;">ℹ</button>
+</h1>
 
 <!-- 使用說明 Modal -->
 <div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;overflow-y:auto;">
@@ -355,8 +358,8 @@
   <div class="quick-chips" id="qc-next"></div>
   <!-- 分頁切換 -->
   <div style="display:flex;gap:6px;margin:8px 0;">
-    <button id="tab-next" onclick="switchNextTab('next')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #9ae6b4;background:#276749;color:white;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下次彙整</button>
-    <button id="tab-afternext" onclick="switchNextTab('afternext')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #d6bcfa;background:#faf5ff;color:#6b46c1;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下下次彙整</button>
+    <button id="tab-next" onclick="switchNextTab('next')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #9ae6b4;background:#276749;color:white;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下次療程彙整</button>
+    <button id="tab-afternext" onclick="switchNextTab('afternext')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #d6bcfa;background:#faf5ff;color:#6b46c1;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下下次療程彙整</button>
   </div>
   <!-- 下次暫存區 -->
   <div id="panel-next">
