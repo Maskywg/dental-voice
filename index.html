@@ -312,13 +312,13 @@
 <!-- 下次可能療程 -->
 <div class="card">
   <div class="field-label">下次可能療程</div>
-  <!-- 分頁切換 -->
-  <div style="display:flex;gap:6px;margin-bottom:10px;">
-    <button id="tab-next" onclick="switchNextTab('next')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #9ae6b4;background:#276749;color:white;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下次</button>
-    <button id="tab-afternext" onclick="switchNextTab('afternext')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #d6bcfa;background:#faf5ff;color:#6b46c1;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下下次</button>
-  </div>
   <!-- 共用選單（依分頁動態切換 fieldId） -->
   <div class="quick-chips" id="qc-next"></div>
+  <!-- 分頁切換 -->
+  <div style="display:flex;gap:6px;margin:8px 0;">
+    <button id="tab-next" onclick="switchNextTab('next')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #9ae6b4;background:#276749;color:white;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下次彙整</button>
+    <button id="tab-afternext" onclick="switchNextTab('afternext')" style="flex:1;padding:6px 0;border-radius:16px;border:1.5px solid #d6bcfa;background:#faf5ff;color:#6b46c1;font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:600;">下下次彙整</button>
+  </div>
   <!-- 下次暫存區 -->
   <div id="panel-next">
     <div class="term-staging" id="staging-next">
