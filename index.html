@@ -555,12 +555,31 @@
     <div style="margin-bottom:12px;">
       <div style="font-size:0.8rem;font-weight:600;color:#718096;margin-bottom:6px;">下次可能療程</div>
       <div class="quick-chips" id="qc-edit-next"></div>
-      <div class="term-staging" id="staging-edit-next">
-        <div class="term-staging-pills" id="staging-edit-next-pills"></div>
-        <div class="term-staging-actions">
-          <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('edit-next')">＋ 增加部位</button>
-          <button class="term-staging-confirm" onclick="commitPendingTerms('edit-next')">✓ 加入彙整</button>
-          <button class="term-staging-clear" onclick="clearPendingTerms('edit-next')">✕ 清除</button>
+      <!-- 分頁切換 -->
+      <div style="display:flex;gap:6px;margin:8px 0;">
+        <button id="tab-edit-next" onclick="switchEditNextTab('edit-next')" style="flex:1;padding:7px 0;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;background:#276749;color:white;">下次療程彙整</button>
+        <button id="tab-edit-afternext" onclick="switchEditNextTab('edit-afternext')" style="flex:1;padding:7px 0;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;background:#faf5ff;color:#6b46c1;">下下次療程彙整</button>
+      </div>
+      <!-- 下次暫存區 -->
+      <div id="panel-edit-next">
+        <div class="term-staging" id="staging-edit-next">
+          <div class="term-staging-pills" id="staging-edit-next-pills"></div>
+          <div class="term-staging-actions">
+            <button class="term-staging-confirm" style="background:#2b6cb0;" onclick="commitAndAddLoc('edit-next')">＋ 增加部位</button>
+            <button class="term-staging-confirm" onclick="commitPendingTerms('edit-next')">✓ 加入彙整</button>
+            <button class="term-staging-clear" onclick="clearPendingTerms('edit-next')">✕ 清除</button>
+          </div>
+        </div>
+      </div>
+      <!-- 下下次暫存區 -->
+      <div id="panel-edit-afternext" style="display:none;">
+        <div class="term-staging" id="staging-edit-afternext" style="border-color:#d6bcfa;background:#faf5ff;">
+          <div class="term-staging-pills" id="staging-edit-afternext-pills"></div>
+          <div class="term-staging-actions">
+            <button class="term-staging-confirm" style="background:#6b46c1;" onclick="commitAndAddLoc('edit-afternext')">＋ 增加部位</button>
+            <button class="term-staging-confirm" style="background:#6b46c1;" onclick="commitPendingTerms('edit-afternext')">✓ 加入彙整</button>
+            <button class="term-staging-clear" onclick="clearPendingTerms('edit-afternext')">✕ 清除</button>
+          </div>
         </div>
       </div>
       <div class="loc-group">
@@ -598,6 +617,11 @@
       <input type="hidden" id="edit-nextloc" value="">
       <div class="loc-divider" style="margin-top:12px;"></div>
       <div class="treatment-display" id="edit-next-display"></div>
+      <!-- 下下次彙整欄 -->
+      <div id="edit-afternext-display" style="display:none;background:#faf5ff;border:1.5px solid #d6bcfa;border-radius:10px;padding:10px 12px;margin-top:6px;min-height:36px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#6b46c1;margin-bottom:4px;">下下次療程可能的項目</div>
+        <div id="edit-afternext-display-items"></div>
+      </div>
       <div class="field-row" style="margin-top:6px;">
         <textarea id="edit-next" rows="2" style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;resize:none;" placeholder="語音補充輸入"></textarea>
         <button class="mic-btn" id="mic-edit-next" onclick="toggleVoice('edit-next')" style="margin-top:0">🎤</button>
@@ -1128,6 +1152,7 @@ function updateLocPreview(fieldId) {
   const stagingField = LOC_STAGING_MAP[fieldId];
   if (stagingField) renderStagingArea(stagingField);
   if (fieldId === 'nextloc') renderStagingArea('afternext');
+  if (fieldId === 'edit-nextloc') renderStagingArea('edit-afternext');
 }
 
 function addLocItem(fieldId, value) {
@@ -1215,12 +1240,14 @@ function openEdit(i) {
   document.getElementById('edit-note').value = h.note || '';
   document.getElementById('edit-lab').value = h.lab || '';
   // 清除修改區的暫存與彙整 display
-  ['edit-treatment', 'edit-next'].forEach(f => {
+  ['edit-treatment', 'edit-next', 'edit-afternext'].forEach(f => {
     pendingTerms[f] = [];
+    stagedLocs[f] = [];
     treatmentItems[f] = [];
     renderStagingArea(f);
     updateTreatmentDisplay(f);
   });
+  switchEditNextTab('edit-next');
   const modal = document.getElementById('editModal');
   modal.style.display = 'flex';
 }
@@ -1239,7 +1266,11 @@ async function saveEdit() {
   const treatment = [...(treatmentItems['edit-treatment'] || []), document.getElementById('edit-treatment').value.trim()].filter(Boolean).join('、');
   const next = [...(treatmentItems['edit-next'] || []), document.getElementById('edit-next').value.trim()].filter(Boolean).join('、');
   const nextloc = document.getElementById('edit-nextloc').value;
-  const note = document.getElementById('edit-note').value.trim();
+  const editAfternextItems = (treatmentItems['edit-afternext'] || []).filter(Boolean);
+  const noteBase = document.getElementById('edit-note').value.trim();
+  const note = editAfternextItems.length
+    ? [noteBase, '下下次：' + editAfternextItems.join('、')].filter(Boolean).join('、')
+    : noteBase;
   const lab = document.getElementById('edit-lab').value;
 
   if (!name) { showToast('請輸入患者姓名', 'error'); return; }
@@ -1371,7 +1402,7 @@ const QUICK_NOTES = [
 
 const STAGING_FIELDS = new Set(['treatment', 'next', 'afternext', 'edit-treatment', 'edit-next']);
 const pendingTerms = {};
-const stagedLocs = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [] };
+const stagedLocs = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [], 'edit-afternext': [] };
 let currentNextTab = 'next';
 
 function appendQuickTerm(fieldId, term) {
@@ -1420,7 +1451,7 @@ function removeStagedLoc(fieldId, idx) {
   }
 }
 
-const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', afternext: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc' };
+const STAGING_LOC_MAP = { treatment: 'location', next: 'nextloc', afternext: 'nextloc', 'edit-treatment': 'edit-location', 'edit-next': 'edit-nextloc', 'edit-afternext': 'edit-nextloc' };
 
 function switchNextTab(tab) {
   currentNextTab = tab;
@@ -1434,7 +1465,7 @@ function switchNextTab(tab) {
   renderQuickChips('qc-next', tab);
 }
 const LOC_STAGING_MAP = { location: 'treatment', nextloc: 'next', 'edit-location': 'edit-treatment', 'edit-nextloc': 'edit-next' };
-const treatmentItems = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [] };
+const treatmentItems = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [], 'edit-afternext': [] };
 
 function _getLocPreviewText(locField) {
   const quads = locPendingQuad[locField] || [];
@@ -1505,6 +1536,37 @@ function removeAfternextItem(i) {
   updateAfternextDisplay();
 }
 
+function updateEditAfternextDisplay() {
+  const items = treatmentItems['edit-afternext'] || [];
+  const wrap = document.getElementById('edit-afternext-display');
+  const list = document.getElementById('edit-afternext-display-items');
+  if (!wrap || !list) return;
+  if (!items.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = items.map((t, i) =>
+    `<span style="display:inline-flex;align-items:center;background:#e9d8fd;color:#44337a;border-radius:14px;padding:3px 10px;margin:2px;font-size:0.82rem;">${t}<button onclick="removeEditAfternextItem(${i})" style="background:none;border:none;cursor:pointer;color:#6b46c1;margin-left:4px;font-size:0.85rem;">✕</button></span>`
+  ).join('');
+}
+
+function removeEditAfternextItem(i) {
+  if (!treatmentItems['edit-afternext']) return;
+  treatmentItems['edit-afternext'].splice(i, 1);
+  updateEditAfternextDisplay();
+}
+
+let currentEditNextTab = 'edit-next';
+function switchEditNextTab(tab) {
+  currentEditNextTab = tab;
+  const isNext = tab === 'edit-next';
+  document.getElementById('tab-edit-next').style.background = isNext ? '#276749' : '#f0fff4';
+  document.getElementById('tab-edit-next').style.color = isNext ? 'white' : '#276749';
+  document.getElementById('tab-edit-afternext').style.background = isNext ? '#faf5ff' : '#6b46c1';
+  document.getElementById('tab-edit-afternext').style.color = isNext ? '#6b46c1' : 'white';
+  document.getElementById('panel-edit-next').style.display = isNext ? '' : 'none';
+  document.getElementById('panel-edit-afternext').style.display = isNext ? 'none' : '';
+  renderQuickChips('qc-edit-next', tab);
+}
+
 function clearPendingTerms(fieldId) {
   pendingTerms[fieldId] = [];
   const locField = STAGING_LOC_MAP[fieldId];
@@ -1517,6 +1579,7 @@ function clearPendingTerms(fieldId) {
 
 function updateTreatmentDisplay(fieldId) {
   if (fieldId === 'afternext') { updateAfternextDisplay(); return; }
+  if (fieldId === 'edit-afternext') { updateEditAfternextDisplay(); return; }
   const el = document.getElementById(fieldId + '-display');
   if (!el) return;
   const items = treatmentItems[fieldId] || [];
