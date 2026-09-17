@@ -1400,7 +1400,7 @@ const QUICK_NOTES = [
   { group: '約診', terms: ['暫不約', '要趕', '急件', '約密集', '原約取消', '照原約', '約診一個月後', '半年定檢', '下次約診手術時間', '回去考慮再打來約'] },
 ];
 
-const STAGING_FIELDS = new Set(['treatment', 'next', 'afternext', 'edit-treatment', 'edit-next']);
+const STAGING_FIELDS = new Set(['treatment', 'next', 'afternext', 'edit-treatment', 'edit-next', 'edit-afternext']);
 const pendingTerms = {};
 const stagedLocs = { treatment: [], next: [], afternext: [], 'edit-treatment': [], 'edit-next': [], 'edit-afternext': [] };
 let currentNextTab = 'next';
@@ -1610,7 +1610,7 @@ function renderQuickChips(containerId, fieldId, isNote = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const list = isNote ? QUICK_NOTES : QUICK_TERMS;
-  const isNext = fieldId === 'next' || fieldId === 'edit-next';
+  const isNext = fieldId === 'next' || fieldId === 'edit-next' || fieldId === 'afternext' || fieldId === 'edit-afternext';
   const btnClass = isNote ? 'qc-btn-note' : (isNext ? 'qc-btn-next' : 'qc-btn');
   el.innerHTML = list.map(g => `
     <div class="qc-divider">${g.group}</div>
