@@ -1036,8 +1036,18 @@ async function submitData() {
   btn.textContent = '上傳至 Google Sheet';
 }
 
+function toRocDateString(d) {
+  const yy = d.getFullYear() - 1911;
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${yy}/${mm}/${dd} ${hh}:${mi}:${ss}`;
+}
+
 function addHistory(name, location, treatment, next, nextloc, note, lab, id) {
-  const now = new Date().toLocaleTimeString('zh-TW');
+  const now = toRocDateString(new Date());
   history.unshift({ name, location, treatment, next, nextloc, note, lab, time: now, id });
   localStorage.setItem('dentalHistory', JSON.stringify(history));
   renderHistory();
