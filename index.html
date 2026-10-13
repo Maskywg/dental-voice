@@ -684,7 +684,7 @@ const APPS_SCRIPT_CODE = `function doGet(e) {
   }
 
   sheet.appendRow([
-    new Date().toLocaleString('zh-TW'),
+    e.parameter.ts || new Date().toLocaleString('zh-TW'),
     e.parameter.name    || '',
     e.parameter.treatment || '',
     e.parameter.next    || ''
@@ -1023,7 +1023,8 @@ async function submitData() {
 
   try {
     const id = Date.now().toString();
-    const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab });
+    const ts = toRocDateString(new Date());
+    const params = new URLSearchParams({ action: 'insert', id, name, location, treatment, next, nextloc, note, lab, ts });
     await fetch(scriptUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
     addHistory(name, location, treatment, next, nextloc, note, lab, id);
     showToast('✅ 上傳成功！', 'success');
